@@ -1,90 +1,115 @@
-\documentclass[11pt]{article}
+\documentclass[conference]{IEEEtran}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[spanish]{babel}
-\usepackage{geometry}
-\usepackage{booktabs}
-\usepackage{hyperref}
+\usepackage[spanish,es-nodecimaldot]{babel}
 \usepackage{amsmath}
-\usepackage{array}
-
-\geometry{margin=2.5cm}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
 
 \title{Sistema predictivo e interpretable para recomendacion de intervenciones academicas basadas en GPA}
-\author{Edson Zepeda y equipo}
-\date{2026}
+
+\author{
+\IEEEauthorblockN{Edson Zepeda y equipo}
+\IEEEauthorblockA{Afiliacion pendiente\\
+Correo pendiente}
+}
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
-Este trabajo presenta un sistema de analisis predictivo orientado a estimar el rendimiento academico de estudiantes y traducir los resultados del modelo en recomendaciones accionables. Se utilizo un conjunto de datos estructurado con 2,392 registros y 15 variables, incluyendo edad, tiempo semanal de estudio, ausencias, apoyo parental, tutorias, actividades extracurriculares y GPA. El objetivo principal fue predecir el GPA mediante modelos de regresion y, adicionalmente, construir un clasificador para estimar la probabilidad de alcanzar buen rendimiento academico, definido como GPA $\geq 2.5$. Se compararon modelos lineales, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en el conjunto de prueba. Aunque XGBoost mostro predicciones altamente correlacionadas con el modelo lineal, presento mayor diferencia entre entrenamiento y prueba, lo que sugiere sobreajuste relativo. La prueba de ablacion sin la variable Absences mostro una degradacion considerable del desempeno, elevando el RMSE del modelo lineal de 0.1963 a 0.8692. Finalmente, se incorporo un motor de recomendaciones que simula intervenciones factibles, excluye variables sensibles y propone planes de mejora ordenados por impacto estimado en GPA y probabilidad de buen rendimiento.
+Este articulo presenta un sistema predictivo e interpretable para estimar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con informacion de edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresion para estimar GPA y una tarea de clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. XGBoost produjo predicciones muy similares a las del modelo lineal, con correlacion de 0.9957, pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. La prueba de ablacion sin la variable Absences incremento el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor practico del sistema no reside solo en predecir, sino en convertir la prediccion en apoyo supervisado para estudiantes y tutores.
 \end{abstract}
 
-\noindent \textbf{Palabras clave:} rendimiento academico, GPA, aprendizaje automatico, XGBoost, recomendaciones academicas, alerta temprana, interpretabilidad.
+\begin{IEEEkeywords}
+rendimiento academico, GPA, aprendizaje automatico, Educational Data Mining, XGBoost, recomendaciones academicas, alerta temprana, interpretabilidad.
+\end{IEEEkeywords}
 
 \section{Introduccion}
 
-La prediccion temprana del rendimiento academico puede apoyar a docentes, tutores y coordinadores academicos en la identificacion de estudiantes que requieren intervenciones oportunas. Sin embargo, un modelo predictivo por si solo no es suficiente si no proporciona informacion accionable. En un contexto educativo, no basta con estimar que un estudiante podria tener bajo rendimiento; tambien es necesario explicar que factores contribuyen al riesgo y que acciones podrian modificar el resultado esperado.
+La prediccion temprana del rendimiento academico es una aplicacion relevante de Educational Data Mining porque permite identificar estudiantes con riesgo y orientar recursos de apoyo antes de que el bajo desempeno se consolide. La literatura reciente muestra que los modelos de aprendizaje automatico pueden ser utiles para anticipar resultados academicos y apoyar decisiones educativas \cite{khairy2024prediction}. Sin embargo, un sistema que solo entrega una etiqueta o un puntaje tiene utilidad limitada: para una escuela, un tutor o un estudiante, la pregunta central no es solamente ``cual sera el GPA'', sino ``que se puede mejorar para elevar la probabilidad de buen rendimiento''.
 
-Este proyecto desarrolla un flujo de trabajo reproducible para: predecir el GPA de un estudiante, comparar modelos de regresion, analizar el comportamiento de XGBoost frente a un modelo lineal, evaluar la importancia de las ausencias mediante una prueba de ablacion, entrenar un clasificador de buen rendimiento academico y generar recomendaciones accionables para el estudiante.
+Este trabajo responde a ese problema mediante un flujo reproducible que combina prediccion, interpretacion y recomendacion. Primero, se entrena un conjunto de modelos de regresion para estimar el GPA. Segundo, se analiza por que XGBoost no supera al modelo lineal aunque sus predicciones se comporten de manera muy parecida. Tercero, se realiza una prueba de ablacion quitando Absences para medir la dependencia del modelo respecto a esa variable. Cuarto, se entrena un clasificador calibrado para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Quinto, se construye un motor de recomendaciones que prueba escenarios de intervencion sobre variables accionables.
 
-El aporte principal del proyecto es pasar de una prediccion numerica a una herramienta orientada a decision: el sistema estima el estado actual del estudiante, simula planes de mejora y documenta mensajes explicables para uso academico.
+La contribucion principal del articulo es proponer una ruta practica para convertir un modelo predictivo de desempeno academico en una herramienta de apoyo. La propuesta evita recomendar sobre variables sensibles o no modificables, como Gender, Ethnicity, StudentID y GradeClass, y se enfoca en variables donde una intervencion educativa podria tener sentido: ausencias, horas de estudio, tutorias, apoyo parental y participacion en actividades. Esta distincion es importante porque los modelos educativos pueden generar riesgos de sesgo o uso indebido si se convierten en decisiones automaticas sin supervision humana \cite{hardt2016equality,barocas2023fairness}.
+
+\section{Trabajo relacionado}
+
+El uso de modelos de clasificacion y regresion para estimar desempeno estudiantil es un tema consolidado en Educational Data Mining. Khairy et al. \cite{khairy2024prediction} muestran que algoritmos de mineria de datos pueden apoyar la prediccion de resultados de examenes. Otros trabajos comparan modelos como Decision Tree, Random Forest, KNN, Naive Bayes y SVM para rendimiento academico, con el objetivo de apoyar sistemas de alerta temprana y programas de intervencion. En paralelo, metodos como Random Forest \cite{breiman2001random}, Support Vector Machines \cite{cortes1995support} y XGBoost \cite{chen2016xgboost} se han utilizado ampliamente por su capacidad de modelar relaciones no lineales y capturar interacciones.
+
+El vacio que atiende este proyecto no es solo obtener una metrica alta, sino conectar el resultado predictivo con acciones interpretables. Un modelo con buen desempeno puede seguir siendo poco util si no traduce su salida en recomendaciones comprensibles y accionables. Por ello, este trabajo incorpora un modulo contrafactual simple: modifica variables accionables, recalcula el GPA estimado y recalcula la probabilidad de buen rendimiento para priorizar planes de mejora.
 
 \section{Datos}
 
-El conjunto de datos contiene 2,392 registros y 15 columnas. Las variables disponibles son: StudentID, Age, Gender, Ethnicity, ParentalEducation, StudyTimeWeekly, Absences, Tutoring, ParentalSupport, Extracurricular, Sports, Music, Volunteering, GPA y GradeClass. No se detectaron valores faltantes.
+Se utilizo el archivo local \texttt{student\_performance.csv}. La fuente probable del dataset es Kaggle, ``Students Performance Dataset'', de Rabie El Kharoua \cite{kharoua2024students}. Esta fuente debe validarse antes de someter el articulo a una revista o congreso, ya que el archivo local no incluye metadata completa de procedencia. Aun asi, el archivo local coincide con el esquema esperado: 2,392 registros y 15 columnas.
 
-Para evitar fuga de informacion, se excluyeron StudentID y GradeClass al entrenar los modelos de prediccion del GPA. StudentID no es una variable informativa para generalizar y GradeClass resume el rendimiento, por lo que usarla para predecir GPA podria introducir leakage. Para el motor de recomendaciones se aplico una restriccion adicional: se excluyeron Gender, Ethnicity, StudentID y GradeClass. Esta decision se tomo porque el objetivo del sistema no es recomendar cambios sobre variables sensibles o no accionables, sino proponer intervenciones practicas.
+Las columnas disponibles son StudentID, Age, Gender, Ethnicity, ParentalEducation, StudyTimeWeekly, Absences, Tutoring, ParentalSupport, Extracurricular, Sports, Music, Volunteering, GPA y GradeClass. No se observaron valores faltantes. El GPA observado en el archivo local se encuentra en el rango empirico de 0.0 a 4.0, con media 1.9062. Para construir el objetivo de clasificacion se definio buen rendimiento como GPA $\geq 2.5$, con 706 estudiantes en la clase positiva y 1,686 por debajo del umbral.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_gpa_distribution.png}
+\caption{Distribucion del GPA observado y umbral utilizado para definir buen rendimiento.}
+\label{fig:gpa_distribution}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=.78\linewidth]{figures/fig_good_performance_balance.png}
+\caption{Balance de clases para el clasificador de buen rendimiento.}
+\label{fig:class_balance}
+\end{figure}
 
 \section{Metodologia}
 
-\subsection{Preprocesamiento}
+\subsection{Preparacion de datos}
 
-El flujo de preprocesamiento se implemento con pipelines de scikit-learn \cite{pedregosa2011scikit} para evitar fuga de informacion entre entrenamiento y prueba. Las variables numericas se imputaron con la mediana y se escalaron con StandardScaler. Las variables categoricas codificadas se imputaron con la moda y se transformaron con OneHotEncoder.
+Para la tarea de regresion se uso GPA como variable objetivo y se eliminaron StudentID y GradeClass. StudentID es un identificador sin valor predictivo generalizable, mientras que GradeClass codifica directamente el rendimiento, por lo que incluirla al predecir GPA generaria fuga de informacion. Se conservaron variables demograficas codificadas para el analisis predictivo general, pero se excluyeron del motor de recomendaciones.
 
-Se uso una particion train/test de 80/20 con random\_state = 42. Ademas, se evaluo estabilidad mediante validacion cruzada de 5 particiones.
+El preprocesamiento se implemento con pipelines de scikit-learn \cite{pedregosa2011scikit}. Las variables numericas se imputaron con mediana y se escalaron con StandardScaler. Las variables categoricas codificadas se imputaron con la moda y se transformaron mediante OneHotEncoder. El conjunto se dividio en entrenamiento y prueba con particion 80/20 y \texttt{random\_state = 42}. La estabilidad se evaluo mediante validacion cruzada de 5 particiones.
 
 \subsection{Modelos de regresion}
 
-Se entrenaron y compararon los siguientes modelos para predecir GPA: LinearRegression, RandomForestRegressor \cite{breiman2001random}, SVR con kernel RBF \cite{cortes1995support} y XGBRegressor \cite{chen2016xgboost}. La evaluacion se realizo con MAE, RMSE y $R^2$.
+Se entrenaron cuatro modelos para estimar GPA: LinearRegression, RandomForestRegressor, SVR con kernel RBF y XGBRegressor. Las metricas principales fueron MAE, RMSE y $R^2$. Se selecciono RMSE como metrica de comparacion principal porque penaliza errores grandes en GPA, lo cual es relevante en escenarios de alerta temprana.
 
-\subsection{Analisis de XGBoost}
+\subsection{Analisis de XGBoost y ablacion}
 
-Debido a que XGBoost aparecia cercano al modelo lineal, se compararon metricas de entrenamiento, prueba y validacion cruzada entre LinearRegression y XGBoost. Tambien se midio la correlacion entre las predicciones de ambos modelos. El resultado mostro que XGBoost produce predicciones muy parecidas a las del modelo lineal, con una correlacion aproximada de 0.9957. Sin embargo, XGBoost tuvo menor error en entrenamiento y mayor error en prueba, lo cual sugiere sobreajuste relativo.
-
-\subsection{Prueba sin ausencias}
-
-Para evaluar la dependencia del modelo respecto a Absences, se repitio el entrenamiento excluyendo esta variable. Esta prueba permite medir cuanto cambia el rendimiento cuando se elimina el factor mas dominante identificado por la importancia de variables.
+El comportamiento de XGBoost se analizo de forma especifica porque sus resultados eran cercanos al modelo lineal, pero no superiores. Para ello se compararon metricas de entrenamiento, prueba y validacion cruzada. Ademas, se midio la correlacion entre las predicciones de LinearRegression y XGBoost. Para estudiar la dependencia del modelo respecto a las ausencias, se repitio el entrenamiento eliminando Absences y se comparo el RMSE resultante contra la linea base.
 
 \subsection{Clasificador de buen rendimiento}
 
-Ademas de predecir GPA, se entreno un clasificador para estimar la probabilidad de alcanzar buen rendimiento academico. Se definio buen rendimiento como:
+Para producir mensajes del tipo ``aumenta tu probabilidad de buen rendimiento'', se entreno una segunda tarea de clasificacion. La variable objetivo se definio como:
 
-\[
-GPA \geq 2.5
-\]
+\begin{equation}
+y_{good} =
+\begin{cases}
+1, & \text{si } GPA \geq 2.5\\
+0, & \text{si } GPA < 2.5
+\end{cases}
+\end{equation}
 
-Se evaluaron modelos de clasificacion y se calibro el mejor modelo para que sus probabilidades fueran mas interpretables. La evaluacion se realizo con ROC AUC, average precision, accuracy, precision, recall, F1 y Brier score.
+Se evaluaron LogisticRegression, RandomForestClassifier, HistGradientBoostingClassifier y XGBClassifier. El mejor clasificador se selecciono por ROC AUC en validacion cruzada y posteriormente se calibro con CalibratedClassifierCV usando calibracion sigmoidal. La calibracion se incluyo porque el motor de recomendaciones usa probabilidades para comparar escenarios, no solo clases binarias.
 
 \subsection{Motor de recomendaciones}
 
-El motor de recomendaciones simula cambios sobre variables accionables: reducir ausencias, aumentar horas de estudio, activar tutorias, incrementar apoyo parental y activar participacion extracurricular, deportiva, musical o voluntariado cuando corresponda. Para cada intervencion se calcula GPA actual estimado, GPA estimado despues del plan, cambio estimado en GPA, probabilidad actual de buen rendimiento, probabilidad estimada despues del plan y cambio en puntos porcentuales.
+El motor de recomendaciones usa solo variables accionables o de contexto no sensible: Age, StudyTimeWeekly, Absences, ParentalEducation, Tutoring, ParentalSupport, Extracurricular, Sports, Music y Volunteering. Se excluyen StudentID, GradeClass, Gender y Ethnicity. Las intervenciones simuladas incluyen reducir ausencias, aumentar horas de estudio, activar tutorias, incrementar apoyo parental y activar una actividad complementaria. Para escenarios intensivos, el motor tambien considera reducir ausencias a un maximo de 5 y aumentar el estudio hasta 20 horas semanales.
 
-El sistema ordena los planes por mayor incremento de probabilidad y GPA, considerando tambien un valor de esfuerzo. Esto permite proponer un plan que sea util para el estudiante y para el tutor.
+Para cada plan se calcula GPA actual estimado, GPA posterior estimado, probabilidad actual de buen rendimiento, probabilidad posterior y diferencia esperada. El sistema ordena planes por incremento de probabilidad, incremento de GPA y esfuerzo estimado. Las salidas del regresor de apoyo se acotan al rango valido de GPA [0, 4] para evitar mensajes imposibles en casos extremos.
 
 \section{Resultados}
 
-\subsection{Comparacion de modelos de regresion}
+\subsection{Regresion de GPA}
 
-\begin{table}[h]
+\begin{table}[!t]
 \centering
-\caption{Resultados de regresion para prediccion de GPA.}
+\caption{Comparacion de modelos de regresion para predecir GPA.}
+\label{tab:regression}
 \begin{tabular}{lrrrrr}
 \toprule
-Modelo & Test MAE & Test RMSE & Test $R^2$ & CV RMSE & CV $R^2$ \\
+Modelo & MAE & RMSE & $R^2$ & CV RMSE & CV $R^2$ \\
 \midrule
 LinearRegression & 0.1551 & 0.1963 & 0.9534 & 0.1974 & 0.9533 \\
 XGBoost & 0.1656 & 0.2117 & 0.9458 & 0.2138 & 0.9452 \\
@@ -94,87 +119,168 @@ Random Forest & 0.1964 & 0.2529 & 0.9226 & 0.2460 & 0.9275 \\
 \end{tabular}
 \end{table}
 
-El modelo lineal tuvo el mejor desempeno en prueba y validacion cruzada. Esto sugiere que, para este conjunto de datos, la relacion entre las variables disponibles y el GPA es capturada de forma suficiente por un modelo lineal.
+El modelo LinearRegression obtuvo el mejor desempeno en prueba, con RMSE = 0.1963 y $R^2$ = 0.9534. La validacion cruzada fue consistente, con CV RMSE = 0.1974 y CV $R^2$ = 0.9533. Esto indica que el resultado no depende solamente de una particion favorable del conjunto de datos.
 
-\subsection{Analisis de XGBoost}
-
-\begin{table}[h]
+\begin{figure}[!t]
 \centering
-\caption{Comparacion entre LinearRegression y XGBoost.}
-\begin{tabular}{lrrrrrr}
+\includegraphics[width=\linewidth]{figures/fig_model_comparison.png}
+\caption{Comparacion de RMSE en prueba y validacion cruzada.}
+\label{fig:model_comparison}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_actual_vs_predicted.png}
+\caption{Valores reales contra predichos para el mejor modelo de regresion.}
+\label{fig:actual_predicted}
+\end{figure}
+
+\subsection{Caso XGBoost}
+
+\begin{table}[!t]
+\centering
+\caption{Comparacion especifica entre LinearRegression y XGBoost.}
+\label{tab:xgboost}
+\begin{tabular}{lrrrr}
 \toprule
-Modelo & Train RMSE & Test RMSE & CV RMSE & Train $R^2$ & Test $R^2$ & CV $R^2$ \\
+Modelo & Train RMSE & Test RMSE & Gap RMSE & Test $R^2$ \\
 \midrule
-LinearRegression & 0.1960 & 0.1963 & 0.1974 & 0.9542 & 0.9534 & 0.9533 \\
-XGBoost & 0.1381 & 0.2117 & 0.2138 & 0.9773 & 0.9458 & 0.9452 \\
+LinearRegression & 0.1960 & 0.1963 & 0.0003 & 0.9534 \\
+XGBoost & 0.1381 & 0.2117 & 0.0736 & 0.9458 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-XGBoost logro un RMSE menor en entrenamiento, pero no en prueba. Esto indica que el modelo tiene mayor capacidad para ajustar patrones del entrenamiento, pero no generalizo mejor que el modelo lineal. Por esta razon no se selecciono como modelo final de regresion.
+XGBoost obtuvo un RMSE menor en entrenamiento, pero mayor en prueba. Esto sugiere que aprovecha su mayor flexibilidad para ajustar mejor el conjunto de entrenamiento, pero no mejora la generalizacion. La correlacion entre predicciones de LinearRegression y XGBoost fue 0.9957, con diferencia absoluta media de 0.0640. Por ello, XGBoost aparece visualmente cercano al modelo lineal, pero no es el mejor modelo final.
 
-\subsection{Prueba sin Absences}
-
-\begin{table}[h]
+\begin{figure}[!t]
 \centering
-\caption{Impacto de quitar Absences.}
-\begin{tabular}{lrrrrr}
+\includegraphics[width=\linewidth]{figures/fig_xgb_lr_predictions.png}
+\caption{Comparacion directa entre predicciones de LinearRegression y XGBoost.}
+\label{fig:xgb_lr}
+\end{figure}
+
+\subsection{Importancia de variables y prueba sin ausencias}
+
+La importancia por permutacion mostro que Absences es la variable dominante. Su importancia media fue 1.0056 en aumento de RMSE al permutarla, seguida por ParentalSupport (0.1225), StudyTimeWeekly (0.1013), Tutoring (0.0519) y Sports (0.0413). La correlacion observada entre Absences y GPA fue -0.9193.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_feature_importance.png}
+\caption{Importancia de variables por permutacion en el conjunto de prueba.}
+\label{fig:feature_importance}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Prueba de ablacion eliminando Absences.}
+\label{tab:ablation}
+\begin{tabular}{lrrrr}
 \toprule
-Modelo & RMSE base & RMSE sin Absences & Delta RMSE & $R^2$ base & $R^2$ sin Absences \\
+Modelo & RMSE base & RMSE sin Absences & $\Delta$ RMSE & $R^2$ sin Absences \\
 \midrule
-LinearRegression & 0.1963 & 0.8692 & 0.6729 & 0.9534 & 0.0864 \\
-Random Forest & 0.2529 & 0.9278 & 0.6749 & 0.9226 & -0.0411 \\
-XGBoost & 0.2117 & 0.9398 & 0.7281 & 0.9458 & -0.0681 \\
-SVR RBF & 0.2520 & 1.0753 & 0.8233 & 0.9232 & -0.3984 \\
+LinearRegression & 0.1963 & 0.8692 & 0.6729 & 0.0864 \\
+Random Forest & 0.2529 & 0.9278 & 0.6749 & -0.0411 \\
+XGBoost & 0.2117 & 0.9398 & 0.7281 & -0.0681 \\
+SVR RBF & 0.2520 & 1.0753 & 0.8233 & -0.3984 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-La eliminacion de Absences redujo de forma considerable el desempeno de todos los modelos. Esto confirma que las ausencias son el factor predictivo mas fuerte del conjunto de datos.
+Al remover Absences, todos los modelos perdieron capacidad predictiva. En LinearRegression, el RMSE paso de 0.1963 a 0.8692. Esta caida confirma que la senal principal del dataset esta concentrada en las ausencias.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_ablation_absences.png}
+\caption{Efecto de remover Absences sobre el RMSE.}
+\label{fig:ablation}
+\end{figure}
 
 \subsection{Clasificador de buen rendimiento}
 
-\begin{table}[h]
+\begin{table}[!t]
 \centering
 \caption{Metricas del clasificador calibrado de buen rendimiento.}
-\begin{tabular}{lrrrrrrr}
+\label{tab:classifier}
+\begin{tabular}{lrrrr}
 \toprule
-Modelo & ROC AUC & Avg. Prec. & Acc. & Prec. & Recall & F1 & Brier \\
+Modelo & ROC AUC & Accuracy & F1 & Brier \\
 \midrule
-LogisticRegression calibrado & 0.9871 & 0.9704 & 0.9478 & 0.9143 & 0.9078 & 0.9110 & 0.0412 \\
+LogisticRegression calibrado & 0.9871 & 0.9478 & 0.9110 & 0.0412 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Estos resultados indican que el clasificador separa adecuadamente a estudiantes con buen rendimiento de aquellos por debajo del umbral. El Brier score bajo sugiere que las probabilidades estimadas son razonablemente utiles para comparar escenarios.
+El clasificador calibrado obtuvo ROC AUC = 0.9871, Average Precision = 0.9704, Accuracy = 0.9478, Precision = 0.9143, Recall = 0.9078, F1 = 0.9110 y Brier score = 0.0412. Estos resultados indican que el modelo separa adecuadamente a los estudiantes que alcanzan GPA $\geq 2.5$ de quienes no lo alcanzan, y que sus probabilidades son utiles para comparar escenarios.
 
-\subsection{Recomendaciones generadas}
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_confusion_matrix.png}
+\caption{Matriz de confusion del clasificador calibrado.}
+\label{fig:confusion}
+\end{figure}
 
-En un caso de demostracion de riesgo alto, el sistema genero un plan combinado que incluia reducir ausencias, aumentar horas de estudio, activar tutorias, incrementar apoyo parental y activar una actividad extracurricular. El plan recomendado mostro un aumento estimado de GPA de 0.16 a 2.64 y una probabilidad de buen rendimiento de 0.0\% a 78.9\%. Estos valores no deben interpretarse como garantia, sino como una simulacion para priorizar acciones.
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_roc_pr_curves.png}
+\caption{Curvas ROC y precision-recall del clasificador calibrado.}
+\label{fig:roc_pr}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_calibration_curve.png}
+\caption{Curva de calibracion de probabilidades.}
+\label{fig:calibration}
+\end{figure}
+
+\subsection{Recomendaciones para el estudiante}
+
+En un caso de alto riesgo, el sistema recomendo un plan intensivo: reducir ausencias a maximo 5, aumentar estudio hasta 20 horas semanales, activar tutorias, aumentar apoyo parental en 2 niveles y activar una actividad extracurricular. Bajo esta simulacion, el GPA estimado paso de 0.0000 a 3.6590 y la probabilidad de buen rendimiento paso de aproximadamente 0.0\% a 99.96\%. Este resultado no debe interpretarse como garantia causal, sino como una simulacion para priorizar acciones.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_recommendation_plan.png}
+\caption{Comparacion entre escenario actual y plan recomendado.}
+\label{fig:recommendation}
+\end{figure}
+
+\subsection{Auditoria basica de equidad}
+
+Aunque Gender y Ethnicity no se usan para recomendar acciones, se calcularon metricas por grupo como auditoria basica. En el conjunto de prueba, la exactitud por Gender fue 0.9375 para el grupo 0 y 0.9582 para el grupo 1. Por Ethnicity, la exactitud oscilo entre 0.9130 y 0.9637. Estas diferencias no prueban sesgo causal, pero justifican que cualquier despliegue institucional incluya monitoreo de desempeno por subgrupos y revision humana.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_fairness_audit.png}
+\caption{Auditoria exploratoria por subgrupos sensibles.}
+\label{fig:fairness}
+\end{figure}
 
 \section{Discusion}
 
-Los resultados muestran tres hallazgos centrales. Primero, el modelo lineal fue el mas estable para predecir GPA, superando a modelos mas complejos como XGBoost, Random Forest y SVR. Segundo, el analisis de XGBoost mostro que la mayor capacidad del modelo no necesariamente mejora la generalizacion. Tercero, la variable Absences domina la prediccion, lo cual convierte la reduccion de ausencias en una intervencion prioritaria.
+Los resultados muestran que el modelo mas complejo no siempre es el mas adecuado. XGBoost tiene mayor capacidad expresiva y ajusta mejor el entrenamiento, pero el modelo lineal generaliza mejor en prueba y validacion cruzada. Esto es coherente con la estructura del dataset: la relacion dominante entre ausencias y GPA parece suficientemente fuerte y casi lineal para que un modelo simple capture gran parte de la senal.
 
-El motor de recomendaciones agrega una capa practica al sistema. En lugar de limitarse a reportar una prediccion, permite probar escenarios y convertir el modelo en una herramienta de apoyo para estudiantes y tutores. Esto es relevante en un entorno escolar, donde el objetivo no debe ser etiquetar a un estudiante, sino identificar acciones que puedan mejorar su trayectoria academica.
+La prueba sin Absences es el hallazgo mas importante para la interpretacion educativa. Si se elimina esa variable, el desempeno cae drasticamente. Esto tiene dos implicaciones. Primero, el modelo depende de una variable altamente informativa, por lo que debe evitarse presentar el sistema como una inteligencia general del rendimiento escolar. Segundo, la reduccion de ausencias es una intervencion prioritaria para estudiantes en riesgo, aunque el modelo por si solo no prueba causalidad.
 
-\section{Consideraciones eticas}
+El componente de recomendacion mejora la utilidad del proyecto porque transforma resultados predictivos en escenarios de accion. En vez de limitarse a mostrar un GPA estimado, el sistema compara planes y cuantifica el cambio esperado. Esta capa convierte el analisis en una herramienta potencial para tutores, coordinadores o estudiantes, siempre que se use como apoyo supervisado.
 
-El uso de modelos predictivos en educacion debe realizarse con cuidado. El sistema no debe utilizarse para excluir, sancionar o etiquetar automaticamente a estudiantes. Las recomendaciones deben entenderse como apoyo a la decision y no como una decision automatica.
+\section{Consideraciones eticas y limitaciones}
 
-Para recomendaciones, el proyecto excluye variables sensibles o no accionables como Gender, Ethnicity, StudentID y GradeClass. Esta separacion reduce el riesgo de sugerir acciones imposibles o eticamente inapropiadas. Aun asi, antes de implementar el sistema en una escuela real, se recomienda validar el modelo con datos locales, revisar sesgos y establecer supervision humana.
+El sistema no debe usarse para sancionar, excluir o etiquetar automaticamente estudiantes. Sus salidas son simulaciones del modelo, no decisiones academicas definitivas. Ademas, aunque se excluyen Gender y Ethnicity del motor de recomendaciones, el conjunto de datos puede contener sesgos historicos o relaciones indirectas entre variables. Por ello, el uso institucional requeriria auditoria periodica, revision humana y validacion con datos locales.
 
-\section{Limitaciones}
+Existen varias limitaciones. Primero, la fuente exacta del dataset debe confirmarse antes de una publicacion formal, aunque la fuente probable es Kaggle \cite{kharoua2024students}. Segundo, el conjunto de datos es transversal y no longitudinal; por tanto, el modelo no estima evolucion temporal. Tercero, las recomendaciones son contrafactuales simples, no evidencia causal. Cuarto, faltan variables relevantes como salud, carga academica, condiciones socioeconomicas, calidad docente y contexto institucional. Quinto, el caso de demostracion intensivo maximiza rendimiento bajo reglas simuladas, pero su factibilidad real dependera del estudiante, tutor y escuela.
 
-Este trabajo tiene limitaciones importantes. La fuente publica exacta del dataset debe documentarse antes de una publicacion formal. El conjunto de datos no incluye informacion temporal, por lo que no se modela evolucion del estudiante a lo largo del tiempo. Las recomendaciones son simulaciones contrafactuales simples, no evidencia causal. El sistema requiere validacion con datos reales de la institucion antes de ser usado en decisiones academicas. Las variables disponibles no capturan todos los factores que influyen en el rendimiento, como salud, contexto socioeconomico, calidad docente o carga academica.
+\section{Conclusiones}
 
-\section{Conclusion}
+Este articulo presento un sistema predictivo e interpretable para estimar GPA y generar recomendaciones academicas accionables. El mejor regresor fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. XGBoost mostro predicciones altamente similares, pero con mayor brecha entre entrenamiento y prueba, por lo que no se selecciono como modelo final. La ablacion sin Absences confirmo que las ausencias son el factor mas influyente. El clasificador calibrado logro ROC AUC = 0.9871 y permitio estimar probabilidades de buen rendimiento para comparar escenarios.
 
-El proyecto demuestra que es posible construir un sistema interpretable para prediccion de GPA y recomendacion de intervenciones academicas. El modelo lineal fue el mejor regresor, con RMSE = 0.1963 y $R^2$ = 0.9534. La prueba sin Absences confirmo que las ausencias son el factor mas influyente. Adicionalmente, el clasificador de buen rendimiento permitio estimar probabilidades de alcanzar GPA $\geq 2.5$, lo que hizo posible generar planes de accion personalizados.
+La contribucion practica del proyecto es conectar prediccion y accion: el sistema identifica factores de riesgo, simula planes de mejora y genera mensajes comprensibles para orientar intervenciones. El siguiente paso es convertir el notebook en una plataforma escolar demo con carga de CSV, ficha individual de estudiante, simulador de intervenciones, reporte para tutores y monitoreo etico de subgrupos.
 
-El siguiente paso para convertir este trabajo en una plataforma escolar real es integrar el notebook en una aplicacion web con captura de casos, carga de CSV, visualizacion de riesgo, simulacion de intervenciones y reportes para tutores. Esta version deberia mantener supervision humana y controles eticos para evitar decisiones automatizadas no justificadas.
+\section*{Disponibilidad}
 
-\bibliographystyle{plain}
+El repositorio del proyecto se encuentra en: \url{https://github.com/Edson-Zepeda/proyecto-gpa}. Las figuras y tablas del paper se generan mediante \texttt{paper/generate\_paper\_assets.py}.
+
+\bibliographystyle{IEEEtran}
 \bibliography{references}
 
 \end{document}

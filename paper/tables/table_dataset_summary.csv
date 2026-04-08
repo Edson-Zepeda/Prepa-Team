@@ -1,0 +1,16 @@
+column,dtype,unique_values,min,max,missing
+StudentID,int64,2392,1001.0,3392.0,0
+Age,int64,4,15.0,18.0,0
+Gender,int64,2,0.0,1.0,0
+Ethnicity,int64,4,0.0,3.0,0
+ParentalEducation,int64,5,0.0,4.0,0
+StudyTimeWeekly,float64,2392,0.001056538645936,19.97809399526153,0
+Absences,int64,30,0.0,29.0,0
+Tutoring,int64,2,0.0,1.0,0
+ParentalSupport,int64,5,0.0,4.0,0
+Extracurricular,int64,2,0.0,1.0,0
+Sports,int64,2,0.0,1.0,0
+Music,int64,2,0.0,1.0,0
+Volunteering,int64,2,0.0,1.0,0
+GPA,float64,2371,0.0,4.0,0
+GradeClass,float64,5,0.0,4.0,0

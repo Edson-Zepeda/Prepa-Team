@@ -1,0 +1,2 @@
+mean_abs_diff_lr_vs_xgb,max_abs_diff_lr_vs_xgb,prediction_correlation,share_lr_better,share_xgb_better
+0.06399478057730117,0.31906728196286993,0.9956748482689806,0.5448851774530271,0.4551148225469729

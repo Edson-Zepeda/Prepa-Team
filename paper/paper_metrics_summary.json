@@ -1,0 +1,91 @@
+{
+  "dataset": {
+    "rows": 2392,
+    "columns": 15,
+    "missing_total": 0,
+    "gpa_min": 0.0,
+    "gpa_max": 4.0,
+    "gpa_mean": 1.9061863027265407,
+    "good_performance_threshold": 2.5,
+    "good_performance_count": 706,
+    "low_performance_count": 1686,
+    "absences_gpa_corr": -0.9193135764208641
+  },
+  "best_regression_model": "linear_regression",
+  "best_regression_metrics": {
+    "train_mae": 0.15910503696480374,
+    "train_rmse": 0.19601328967561646,
+    "train_r2": 0.9542382758666188,
+    "test_mae": 0.1550560560078522,
+    "test_rmse": 0.19630825342373784,
+    "test_r2": 0.9533977379675411,
+    "cv_mae": 0.15920923252183522,
+    "cv_rmse": 0.1974019290666496,
+    "cv_r2": 0.9532733721820877
+  },
+  "top_features": [
+    {
+      "feature": "Absences",
+      "importance_mean": 1.0055982937604124,
+      "importance_std": 0.03555225176131059
+    },
+    {
+      "feature": "ParentalSupport",
+      "importance_mean": 0.12247280971180707,
+      "importance_std": 0.007383416444589084
+    },
+    {
+      "feature": "StudyTimeWeekly",
+      "importance_mean": 0.10126177815609791,
+      "importance_std": 0.005802581944647558
+    },
+    {
+      "feature": "Tutoring",
+      "importance_mean": 0.051886815355044594,
+      "importance_std": 0.00406526219178613
+    },
+    {
+      "feature": "Sports",
+      "importance_mean": 0.041345964410453746,
+      "importance_std": 0.0038188257608900798
+    }
+  ],
+  "xgboost_similarity": {
+    "mean_abs_diff_lr_vs_xgb": 0.06399478057730117,
+    "max_abs_diff_lr_vs_xgb": 0.31906728196286993,
+    "prediction_correlation": 0.9956748482689806,
+    "share_lr_better": 0.5448851774530271,
+    "share_xgb_better": 0.4551148225469729
+  },
+  "best_classifier": "logistic_regression_calibrated",
+  "classifier_metrics": {
+    "model": "logistic_regression_calibrated",
+    "test_roc_auc": 0.9870745729992866,
+    "test_avg_precision": 0.9704262383067161,
+    "test_accuracy": 0.9478079331941545,
+    "test_precision": 0.9142857142857143,
+    "test_recall": 0.9078014184397163,
+    "test_f1": 0.9110320284697508,
+    "test_brier": 0.041186474476501304
+  },
+  "best_recommendation_plan": {
+    "plan": "reducir ausencias a maximo 5 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
+    "gpa_actual": 0.0,
+    "gpa_estimado": 3.659043307621814,
+    "delta_gpa": 3.659043307621814,
+    "prob_actual": 5.986510911079254e-08,
+    "prob_estimada": 0.9996366729711934,
+    "delta_prob": 0.9996366131060843,
+    "esfuerzo": 46,
+    "Absences_plan": 5.0,
+    "StudyTimeWeekly_plan": 20.0,
+    "Tutoring_plan": 1.0,
+    "ParentalSupport_plan": 4.0
+  },
+  "excluded_from_advice": [
+    "StudentID",
+    "GradeClass",
+    "Gender",
+    "Ethnicity"
+  ]
+}

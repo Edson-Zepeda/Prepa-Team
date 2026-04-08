@@ -1,0 +1,2 @@
+model,test_roc_auc,test_avg_precision,test_accuracy,test_precision,test_recall,test_f1,test_brier
+logistic_regression_calibrated,0.9870745729992866,0.9704262383067161,0.9478079331941545,0.9142857142857143,0.9078014184397163,0.9110320284697508,0.041186474476501304
