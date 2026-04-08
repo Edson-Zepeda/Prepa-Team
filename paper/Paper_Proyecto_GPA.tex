@@ -14,20 +14,31 @@
 
 \author{
 \IEEEauthorblockN{Edson Manuel Zepeda Chavez}
-\IEEEauthorblockA{\textit{Afiliacion pendiente}\\
+\IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
+Universidad de Monterrey, Mexico\\
 rmcedson09@gmail.com}
 \and
 \IEEEauthorblockN{Francisco Ricardo Moreno Sanchez}
-\IEEEauthorblockA{\textit{Afiliacion pendiente}\\
+\IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
+Universidad de Monterrey, Mexico\\
 fmorenosanchez39@gmail.com}
 \and
 \IEEEauthorblockN{Alan Emir Martinez Espinosa}
-\IEEEauthorblockA{\textit{Afiliacion pendiente}\\
+\IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
+Universidad de Monterrey, Mexico\\
 maresesp012@gmail.com}
+}
+
+\newcommand{\projectlogos}{%
+\begin{center}
+\IfFileExists{figures/logo_udem.png}{\includegraphics[height=0.8cm]{figures/logo_udem.png}\hspace{1.2cm}}{}%
+\IfFileExists{figures/logo_sic.png}{\includegraphics[height=0.8cm]{figures/logo_sic.png}}{}%
+\end{center}
 }
 
 \begin{document}
 \maketitle
+\projectlogos
 
 \begin{abstract}
 Este articulo presenta un sistema predictivo e interpretable para estimar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con informacion de edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresion para estimar GPA y una tarea de clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. XGBoost produjo predicciones muy similares a las del modelo lineal, con correlacion de 0.9957, pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. La prueba de ablacion sin la variable Absences incremento el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor practico del sistema no reside solo en predecir, sino en convertir la prediccion en apoyo supervisado para estudiantes y tutores.
