@@ -11,7 +11,7 @@
 
 Este articulo presenta un sistema de inteligencia artificial, basado en aprendizaje automatico, para predecir y analizar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un dataset tabular de 2,392 estudiantes y 15 variables, incluyendo edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina regresion para estimar GPA y clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como `GPA >= 2.5`.
 
-El mejor modelo de regresion fue `LinearRegression`, con `RMSE = 0.1963` y `R2 = 0.9534` en prueba. `XGBoost` produjo predicciones muy similares a las del modelo lineal (`correlacion = 0.9957`), pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. Al quitar `Absences`, el RMSE del modelo lineal subio de `0.1963` a `0.8692`, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento.
+El mejor modelo de regresion fue `LinearRegression`, con `RMSE = 0.1963` y `R2 = 0.9534` en prueba. Despues de afinar hiperparametros, `XGBoost` redujo su `RMSE` de prueba a `0.2028` y mantuvo predicciones muy similares a las del modelo lineal (`correlacion = 0.9979`), pero no lo supero en generalizacion. Al quitar `Absences`, el RMSE del modelo lineal subio de `0.1963` a `0.8692`, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento.
 
 **Palabras clave:** rendimiento academico, GPA, aprendizaje automatico, Educational Data Mining, XGBoost, recomendaciones academicas, alerta temprana, interpretabilidad.
 
@@ -84,7 +84,7 @@ Y simula cambios sobre:
 | Modelo | Test MAE | Test RMSE | Test R2 | CV RMSE | CV R2 |
 |---|---:|---:|---:|---:|---:|
 | LinearRegression | 0.1551 | 0.1963 | 0.9534 | 0.1974 | 0.9533 |
-| XGBoost | 0.1656 | 0.2117 | 0.9458 | 0.2138 | 0.9452 |
+| XGBoost | 0.1584 | 0.2028 | 0.9503 | 0.2043 | 0.9500 |
 | SVR RBF | 0.2024 | 0.2520 | 0.9232 | 0.2491 | 0.9257 |
 | Random Forest | 0.1964 | 0.2529 | 0.9226 | 0.2460 | 0.9275 |
 
@@ -99,9 +99,9 @@ El mejor modelo fue `LinearRegression`. La validacion cruzada fue casi igual al 
 | Modelo | Train RMSE | Test RMSE | Gap RMSE | Test R2 |
 |---|---:|---:|---:|---:|
 | LinearRegression | 0.1960 | 0.1963 | 0.0003 | 0.9534 |
-| XGBoost | 0.1381 | 0.2117 | 0.0736 | 0.9458 |
+| XGBoost | 0.1811 | 0.2028 | 0.0217 | 0.9503 |
 
-`XGBoost` se ve cercano al modelo lineal porque sus predicciones estan muy correlacionadas (`0.9957`). Aun asi, su error baja mucho en entrenamiento y sube en prueba. La interpretacion es que tiene mayor capacidad para ajustar el train, pero no generaliza mejor en este dataset.
+Despues de afinar hiperparametros, `XGBoost` bajo bastante su error frente a la configuracion inicial, pero sigue sin superar a `LinearRegression`. Sus predicciones siguen muy correlacionadas con las del modelo lineal (`0.9979`), con diferencia absoluta media de `0.0453`. La interpretacion es que `XGBoost` mejora al capturar mas estructura, pero el dataset sigue favoreciendo una solucion casi lineal.
 
 ![Predicciones LinearRegression vs XGBoost](figures/fig_xgb_lr_predictions.png)
 
@@ -124,11 +124,11 @@ La correlacion entre `Absences` y `GPA` fue `-0.9193`.
 | Modelo | RMSE base | RMSE sin Absences | Delta RMSE | R2 sin Absences |
 |---|---:|---:|---:|---:|
 | LinearRegression | 0.1963 | 0.8692 | 0.6729 | 0.0864 |
+| XGBoost | 0.2028 | 0.8958 | 0.6931 | 0.0295 |
 | Random Forest | 0.2529 | 0.9278 | 0.6749 | -0.0411 |
-| XGBoost | 0.2117 | 0.9398 | 0.7281 | -0.0681 |
 | SVR RBF | 0.2520 | 1.0753 | 0.8233 | -0.3984 |
 
-La caida de rendimiento confirma que `Absences` concentra la senal principal del dataset.
+La caida de rendimiento confirma que `Absences` concentra la senal principal del dataset. Incluso con `XGBoost` afinado, el modelo sigue quedando ligeramente por debajo del lineal cuando esa variable se elimina.
 
 ![Ablation sin Absences](figures/fig_ablation_absences.png)
 
@@ -174,7 +174,7 @@ Aunque `Gender` y `Ethnicity` no se usan para recomendar acciones, se evaluaron 
 
 ## 5. Discusion
 
-El resultado central es que el modelo mas complejo no fue el mejor. `XGBoost` ajusto mejor el entrenamiento, pero no generalizo mejor que `LinearRegression`. La razon probable es que el dataset tiene una relacion dominante y casi lineal entre `Absences` y `GPA`.
+El resultado central es que el modelo mas complejo no fue el mejor. Incluso despues de afinarlo, `XGBoost` no generalizo mejor que `LinearRegression`. La razon probable es que el dataset tiene una relacion dominante y casi lineal entre `Absences` y `GPA`.
 
 La utilidad del proyecto esta en la capa de recomendacion. El sistema no solo predice, sino que simula escenarios y prioriza acciones. Esto lo acerca a una herramienta de alerta temprana para tutores y estudiantes.
 
@@ -192,7 +192,7 @@ Limitaciones principales:
 
 ## 7. Conclusion
 
-El proyecto demuestra que es posible construir un sistema interpretable para predecir GPA y recomendar intervenciones academicas. `LinearRegression` fue el mejor regresor, `Absences` fue la variable dominante y el clasificador calibrado permitio traducir cambios simulados en probabilidades de buen rendimiento.
+El proyecto demuestra que es posible construir un sistema interpretable para predecir GPA y recomendar intervenciones academicas. `LinearRegression` fue el mejor regresor, `XGBoost` afinado redujo la brecha pero no lo supero, `Absences` fue la variable dominante y el clasificador calibrado permitio traducir cambios simulados en probabilidades de buen rendimiento.
 
 El siguiente paso natural es convertir el notebook en una plataforma escolar demo con carga de CSV, ficha individual del estudiante, simulador de intervenciones, reporte para tutores y monitoreo etico de subgrupos.
 

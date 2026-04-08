@@ -128,6 +128,38 @@ def build_pipeline(model, numeric_features: list[str] | None = None, categorical
     )
 
 
+def build_tree_preprocessor(features: list[str]) -> ColumnTransformer:
+    return ColumnTransformer(
+        transformers=[
+            (
+                "tree_features",
+                Pipeline([("imputer", SimpleImputer(strategy="most_frequent"))]),
+                features,
+            )
+        ],
+        remainder="drop",
+    )
+
+
+def build_tree_pipeline(model, features: list[str]):
+    return Pipeline(
+        [
+            ("preprocessor", build_tree_preprocessor(features)),
+            ("model", model),
+        ]
+    )
+
+
+def build_model_pipeline(model, numeric_features: list[str] | None = None, categorical_features: list[str] | None = None):
+    numeric_features = numeric_features or NUMERIC_FEATURES
+    categorical_features = categorical_features or CATEGORICAL_FEATURES
+    if XGBRegressor is not None and isinstance(model, XGBRegressor):
+        return build_tree_pipeline(model, numeric_features + categorical_features)
+    if XGBClassifier is not None and isinstance(model, XGBClassifier):
+        return build_tree_pipeline(model, numeric_features + categorical_features)
+    return build_pipeline(model, numeric_features, categorical_features)
+
+
 def metric_block(y_true, y_pred, prefix: str) -> dict[str, float]:
     mse = mean_squared_error(y_true, y_pred)
     return {
@@ -191,13 +223,15 @@ def build_classifier_candidates() -> dict[str, object]:
         candidates["xgboost_classifier"] = XGBClassifier(
             objective="binary:logistic",
             eval_metric="logloss",
-            n_estimators=500,
-            learning_rate=0.03,
+            n_estimators=800,
+            learning_rate=0.05,
             max_depth=2,
-            subsample=0.9,
+            subsample=0.8,
             colsample_bytree=0.8,
-            min_child_weight=3,
-            reg_lambda=2.0,
+            min_child_weight=1,
+            gamma=0.05,
+            reg_alpha=0.6,
+            reg_lambda=8.0,
             random_state=RANDOM_STATE,
             n_jobs=-1,
             tree_method="hist",
@@ -358,18 +392,23 @@ def main() -> None:
         models["xgboost"] = XGBRegressor(
             objective="reg:squarederror",
             n_estimators=400,
-            learning_rate=0.05,
-            max_depth=4,
+            learning_rate=0.08,
+            max_depth=2,
+            min_child_weight=5,
             subsample=0.9,
-            colsample_bytree=0.9,
+            colsample_bytree=0.7,
+            gamma=0.0,
+            reg_alpha=0.0,
+            reg_lambda=1.5,
             random_state=RANDOM_STATE,
             n_jobs=-1,
+            tree_method="hist",
         )
 
     metrics_records = []
     fitted_pipelines = {}
     for model_name, model in models.items():
-        pipeline = build_pipeline(model)
+        pipeline = build_model_pipeline(model)
         pipeline.fit(X_train, y_train)
         train_predictions = pipeline.predict(X_train)
         test_predictions = pipeline.predict(X_test)
@@ -490,7 +529,9 @@ def main() -> None:
     no_absences_records = []
     for model_name, model in models.items():
         base_row = metrics_df.loc[metrics_df["model"] == model_name].iloc[0]
-        pipeline_wo = build_pipeline(clone(model), numeric_features=numeric_wo_absences, categorical_features=CATEGORICAL_FEATURES)
+        pipeline_wo = build_model_pipeline(
+            clone(model), numeric_features=numeric_wo_absences, categorical_features=CATEGORICAL_FEATURES
+        )
         pipeline_wo.fit(X_train_wo, y_train_wo)
         pred_wo = pipeline_wo.predict(X_test_wo)
         rmse_wo = mean_squared_error(y_test_wo, pred_wo) ** 0.5
@@ -527,7 +568,9 @@ def main() -> None:
     cv_classifier = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     classifier_records = []
     for model_name, model in classifier_candidates.items():
-        pipeline = build_pipeline(model, numeric_features=ADVICE_NUMERIC_FEATURES, categorical_features=ADVICE_CATEGORICAL_FEATURES)
+        pipeline = build_model_pipeline(
+            model, numeric_features=ADVICE_NUMERIC_FEATURES, categorical_features=ADVICE_CATEGORICAL_FEATURES
+        )
         pipeline.fit(X_train_adv, y_train_good)
         probabilities = pipeline.predict_proba(X_test_adv)[:, 1]
         predictions = (probabilities >= 0.5).astype(int)
@@ -569,7 +612,7 @@ def main() -> None:
     best_classifier_name = classifier_metrics_df.loc[0, "model"]
     best_base_classifier = classifier_candidates[best_classifier_name]
     best_classifier_pipeline = CalibratedClassifierCV(
-        estimator=build_pipeline(
+        estimator=build_model_pipeline(
             best_base_classifier,
             numeric_features=ADVICE_NUMERIC_FEATURES,
             categorical_features=ADVICE_CATEGORICAL_FEATURES,
@@ -737,22 +780,44 @@ def main() -> None:
             "Probabilidad": [best_plan["prob_actual"], best_plan["prob_estimada"]],
         }
     )
-    fig, axes = plt.subplots(1, 2, figsize=(9.4, 4.0))
-    gpa_bars = axes[0].bar(rec_plot["escenario"], rec_plot["GPA"], color=["#E45756", "#54A24B"])
-    axes[0].set_ylim(0, 4.4)
-    axes[0].set_title("GPA estimado", fontsize=12)
-    axes[0].set_ylabel("GPA")
-    axes[0].bar_label(gpa_bars, labels=[f"{value:.2f}" for value in rec_plot["GPA"]], padding=3)
-    probability_bars = axes[1].bar(
-        rec_plot["escenario"], rec_plot["Probabilidad"] * 100, color=["#E45756", "#54A24B"]
+    fig, axes = plt.subplots(1, 2, figsize=(9.8, 4.0))
+    gpa_current = float(best_plan["gpa_actual"])
+    gpa_after = float(best_plan["gpa_estimado"])
+    prob_current = float(best_plan["prob_actual"]) * 100
+    prob_after = float(best_plan["prob_estimada"]) * 100
+
+    axes[0].hlines(y=0, xmin=gpa_current, xmax=gpa_after, color="#9D9D9D", linewidth=3)
+    axes[0].scatter([gpa_current], [0], color="#E45756", s=90, zorder=3, label="Actual")
+    axes[0].scatter([gpa_after], [0], color="#54A24B", s=90, zorder=3, label="Plan recomendado")
+    axes[0].annotate(f"{gpa_current:.2f}", (gpa_current, 0), xytext=(0, 12), textcoords="offset points", ha="center")
+    axes[0].annotate(f"{gpa_after:.2f}", (gpa_after, 0), xytext=(0, 12), textcoords="offset points", ha="center")
+    axes[0].text((gpa_current + gpa_after) / 2, -0.18, f"+{best_plan['delta_gpa']:.2f}", ha="center", fontsize=10)
+    axes[0].set_xlim(0, 4.2)
+    axes[0].set_ylim(-0.35, 0.35)
+    axes[0].set_yticks([])
+    axes[0].set_xlabel("GPA")
+    axes[0].set_title("Cambio estimado de GPA", fontsize=12)
+
+    axes[1].hlines(y=0, xmin=prob_current, xmax=prob_after, color="#9D9D9D", linewidth=3)
+    axes[1].scatter([prob_current], [0], color="#E45756", s=90, zorder=3)
+    axes[1].scatter([prob_after], [0], color="#54A24B", s=90, zorder=3)
+    axes[1].annotate(f"{prob_current:.1f}%", (prob_current, 0), xytext=(0, 12), textcoords="offset points", ha="center")
+    axes[1].annotate(f"{prob_after:.1f}%", (prob_after, 0), xytext=(0, 12), textcoords="offset points", ha="center")
+    axes[1].text(
+        (prob_current + prob_after) / 2,
+        -0.18,
+        f"+{best_plan['delta_prob'] * 100:.1f} pp",
+        ha="center",
+        fontsize=10,
     )
-    axes[1].set_ylim(0, 110)
-    axes[1].set_title("Probabilidad GPA >= 2.5", fontsize=12)
-    axes[1].set_ylabel("Porcentaje")
-    axes[1].bar_label(probability_bars, labels=[f"{value * 100:.1f}%" for value in rec_plot["Probabilidad"]], padding=3)
-    for ax in axes:
-        ax.tick_params(axis="x", rotation=10)
-    fig.suptitle("Impacto simulado del plan recomendado", y=1.02, fontsize=14)
+    axes[1].set_xlim(0, 100)
+    axes[1].set_ylim(-0.35, 0.35)
+    axes[1].set_yticks([])
+    axes[1].set_xlabel("Probabilidad (%)")
+    axes[1].set_title("Cambio en probabilidad de buen rendimiento", fontsize=12)
+
+    fig.legend(loc="upper center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.02))
+    fig.suptitle("Impacto simulado del plan recomendado", y=1.08, fontsize=14)
     savefig("fig_recommendation_plan.png")
 
     summary = {

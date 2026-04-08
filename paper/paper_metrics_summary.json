@@ -51,11 +51,11 @@
     }
   ],
   "xgboost_similarity": {
-    "mean_abs_diff_lr_vs_xgb": 0.06399478057730117,
-    "max_abs_diff_lr_vs_xgb": 0.31906728196286993,
-    "prediction_correlation": 0.9956748482689806,
-    "share_lr_better": 0.5448851774530271,
-    "share_xgb_better": 0.4551148225469729
+    "mean_abs_diff_lr_vs_xgb": 0.045301668945863544,
+    "max_abs_diff_lr_vs_xgb": 0.18667141678619048,
+    "prediction_correlation": 0.9979089986096626,
+    "share_lr_better": 0.5427974947807933,
+    "share_xgb_better": 0.4572025052192067
   },
   "best_classifier": "logistic_regression_calibrated",
   "classifier_metrics": {

@@ -12,7 +12,7 @@
 
 This article presents an artificial intelligence system, based on machine learning, for predicting and analyzing student academic performance and translating model outputs into actionable early-intervention recommendations. The study uses a tabular dataset of 2,392 students and 15 variables, including age, weekly study time, absences, tutoring, parental support, extracurricular activities, and GPA. The approach combines regression for GPA estimation and calibrated classification for estimating the probability of achieving good performance, defined as `GPA >= 2.5`.
 
-The best regression model was `LinearRegression`, with `RMSE = 0.1963` and `R2 = 0.9534` on the test set. `XGBoost` produced predictions highly similar to those of the linear model (`correlation = 0.9957`), but it showed a larger train-test gap and therefore did not generalize better. Removing `Absences` increased the linear model RMSE from `0.1963` to `0.8692`, confirming that absences are the dominant factor. Finally, a recommendation engine was implemented to simulate interventions, exclude sensitive or non-actionable variables, and prioritize actions with the highest estimated impact on GPA and probability of good performance.
+The best regression model was `LinearRegression`, with `RMSE = 0.1963` and `R2 = 0.9534` on the test set. After hyperparameter tuning, `XGBoost` reduced its test RMSE to `0.2028` and remained highly similar to the linear model (`correlation = 0.9979`), but it still did not generalize better. Removing `Absences` increased the linear model RMSE from `0.1963` to `0.8692`, confirming that absences are the dominant factor. Finally, a recommendation engine was implemented to simulate interventions, exclude sensitive or non-actionable variables, and prioritize actions with the highest estimated impact on GPA and probability of good performance.
 
 **Keywords:** academic performance, GPA, machine learning, Educational Data Mining, XGBoost, academic recommendations, early warning, interpretability.
 
@@ -85,7 +85,7 @@ And simulates changes on:
 | Model | Test MAE | Test RMSE | Test R2 | CV RMSE | CV R2 |
 |---|---:|---:|---:|---:|---:|
 | LinearRegression | 0.1551 | 0.1963 | 0.9534 | 0.1974 | 0.9533 |
-| XGBoost | 0.1656 | 0.2117 | 0.9458 | 0.2138 | 0.9452 |
+| XGBoost | 0.1584 | 0.2028 | 0.9503 | 0.2043 | 0.9500 |
 | SVR RBF | 0.2024 | 0.2520 | 0.9232 | 0.2491 | 0.9257 |
 | Random Forest | 0.1964 | 0.2529 | 0.9226 | 0.2460 | 0.9275 |
 
@@ -100,9 +100,9 @@ The best model was `LinearRegression`. Cross-validation was very close to the te
 | Model | Train RMSE | Test RMSE | Gap RMSE | Test R2 |
 |---|---:|---:|---:|---:|
 | LinearRegression | 0.1960 | 0.1963 | 0.0003 | 0.9534 |
-| XGBoost | 0.1381 | 0.2117 | 0.0736 | 0.9458 |
+| XGBoost | 0.1811 | 0.2028 | 0.0217 | 0.9503 |
 
-`XGBoost` appears close to the linear model because their predictions are highly correlated (`0.9957`). However, its error is much lower on training and higher on testing. The interpretation is that it has more capacity to fit the training set, but it does not generalize better on this dataset.
+After hyperparameter tuning, `XGBoost` reduced its error considerably compared with the initial configuration, but it still did not outperform `LinearRegression`. Their predictions remain highly correlated (`0.9979`), with a mean absolute difference of `0.0453`. The interpretation is that `XGBoost` captures more structure, but the dataset still favors an almost linear solution.
 
 ![LinearRegression vs XGBoost predictions](figures/fig_xgb_lr_predictions.png)
 
@@ -125,11 +125,11 @@ The correlation between `Absences` and `GPA` was `-0.9193`.
 | Model | Base RMSE | RMSE without Absences | Delta RMSE | R2 without Absences |
 |---|---:|---:|---:|---:|
 | LinearRegression | 0.1963 | 0.8692 | 0.6729 | 0.0864 |
+| XGBoost | 0.2028 | 0.8958 | 0.6931 | 0.0295 |
 | Random Forest | 0.2529 | 0.9278 | 0.6749 | -0.0411 |
-| XGBoost | 0.2117 | 0.9398 | 0.7281 | -0.0681 |
 | SVR RBF | 0.2520 | 1.0753 | 0.8233 | -0.3984 |
 
-The performance drop confirms that `Absences` concentrates the main signal of the dataset.
+The performance drop confirms that `Absences` concentrates the main signal of the dataset. Even with tuned `XGBoost`, the model remains slightly below the linear baseline when that variable is removed.
 
 ![Ablation without Absences](figures/fig_ablation_absences.png)
 
@@ -175,7 +175,7 @@ Although `Gender` and `Ethnicity` are not used to recommend actions, group-level
 
 ## 5. Discussion
 
-The central result is that the most complex model was not the best. `XGBoost` fit the training set better, but it did not generalize better than `LinearRegression`. The likely reason is that the dataset has a dominant and nearly linear relationship between `Absences` and `GPA`.
+The central result is that the most complex model was not the best. Even after tuning, `XGBoost` did not generalize better than `LinearRegression`. The likely reason is that the dataset has a dominant and nearly linear relationship between `Absences` and `GPA`.
 
 The usefulness of the project is in the recommendation layer. The system not only predicts, but also simulates scenarios and prioritizes actions. This makes it closer to an early-warning tool for tutors and students.
 
@@ -193,7 +193,7 @@ Main limitations:
 
 ## 7. Conclusion
 
-The project shows that it is possible to build an interpretable system for GPA prediction and academic intervention recommendations. `LinearRegression` was the best regressor, `Absences` was the dominant variable, and the calibrated classifier allowed simulated changes to be translated into good-performance probabilities.
+The project shows that it is possible to build an interpretable system for GPA prediction and academic intervention recommendations. `LinearRegression` was the best regressor, tuned `XGBoost` narrowed the gap but did not surpass it, `Absences` was the dominant variable, and the calibrated classifier allowed simulated changes to be translated into good-performance probabilities.
 
 The natural next step is to convert the notebook into a school demo platform with CSV upload, individual student profiles, an intervention simulator, tutor reports, and ethical subgroup monitoring.
 
