@@ -55,10 +55,6 @@ paper/paper_metrics_summary.json
 
 ## Como generar el PDF en Overleaf
 
-Esta maquina no tiene `pdflatex` ni `pandoc` instalados, por lo que el PDF se debe compilar en Overleaf.
-
-Pasos:
-
 1. Subir la carpeta `paper/` completa a Overleaf.
 2. Abrir el archivo principal que quieras compilar:
    - Espanol: `Paper_Proyecto_GPA.tex`
