@@ -27,6 +27,7 @@ paper/references.bib
 paper/generate_paper_assets.py
 paper/figures/
 paper/tables/
+docs/WEB_BETA_BRANCHING_GUIDE.md
 requirements.txt
 ```
 
@@ -61,6 +62,14 @@ paper/paper_metrics_summary.json
    - Ingles: `Paper_GPA_English.tex`
 3. Compilar con BibTeX habilitado para usar `references.bib`.
 4. Descargar el PDF generado.
+
+## Guia para beta web
+
+La guia de ramas y responsabilidades para el desarrollo web beta esta en:
+
+```text
+docs/WEB_BETA_BRANCHING_GUIDE.md
+```
 
 ## Nota etica
 
