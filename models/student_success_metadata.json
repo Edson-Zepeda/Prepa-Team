@@ -1,0 +1,139 @@
+{
+  "dataset_rows": 2392,
+  "dataset_columns": 15,
+  "target": "GPA",
+  "good_performance_threshold": 2.5,
+  "advice_features": [
+    "Age",
+    "StudyTimeWeekly",
+    "Absences",
+    "ParentalEducation",
+    "Tutoring",
+    "ParentalSupport",
+    "Extracurricular",
+    "Sports",
+    "Music",
+    "Volunteering"
+  ],
+  "actionable_features": [
+    "StudyTimeWeekly",
+    "Absences",
+    "Tutoring",
+    "ParentalSupport",
+    "Extracurricular",
+    "Sports",
+    "Music",
+    "Volunteering"
+  ],
+  "excluded_from_advice": [
+    "StudentID",
+    "GradeClass",
+    "Gender",
+    "Ethnicity"
+  ],
+  "best_regression_model": "linear_regression",
+  "regression_metrics": [
+    {
+      "model": "linear_regression",
+      "train_mae": 0.15910503696480374,
+      "train_rmse": 0.19601328967561646,
+      "train_r2": 0.9542382758666188,
+      "test_mae": 0.1550560560078522,
+      "test_rmse": 0.19630825342373784,
+      "test_r2": 0.9533977379675411,
+      "cv_mae": 0.15920923252183522,
+      "cv_rmse": 0.1974019290666496,
+      "cv_r2": 0.9532733721820877
+    },
+    {
+      "model": "xgboost",
+      "train_mae": 0.11009598335202828,
+      "train_rmse": 0.13811175893432048,
+      "train_r2": 0.9772808197917427,
+      "test_mae": 0.1656278706622977,
+      "test_rmse": 0.21171492000327133,
+      "test_r2": 0.9457958162594752,
+      "cv_mae": 0.17006204721552026,
+      "cv_rmse": 0.21382570034915388,
+      "cv_r2": 0.9451917594429645
+    },
+    {
+      "model": "svr_rbf",
+      "train_mae": 0.08837031004297406,
+      "train_rmse": 0.09741979272783784,
+      "train_r2": 0.9886961666486135,
+      "test_mae": 0.20244741839651892,
+      "test_rmse": 0.2520017067783046,
+      "test_r2": 0.9232043105549038,
+      "cv_mae": 0.20018107736332863,
+      "cv_rmse": 0.24910341993214438,
+      "cv_r2": 0.9256629370565085
+    },
+    {
+      "model": "random_forest",
+      "train_mae": 0.07306520483311005,
+      "train_rmse": 0.09119776004376587,
+      "train_r2": 0.9900939689065318,
+      "test_mae": 0.1963675205982804,
+      "test_rmse": 0.2529338368548725,
+      "test_r2": 0.9226351401062332,
+      "cv_mae": 0.1960724289516869,
+      "cv_rmse": 0.24602053097215498,
+      "cv_r2": 0.9274816781650342
+    }
+  ],
+  "classifier_metrics": [
+    {
+      "model": "logistic_regression_calibrated",
+      "test_roc_auc": 0.9870745729992866,
+      "test_avg_precision": 0.9704262383067161,
+      "test_accuracy": 0.9478079331941545,
+      "test_precision": 0.9142857142857143,
+      "test_recall": 0.9078014184397163,
+      "test_f1": 0.9110320284697508,
+      "test_brier": 0.041186474476501304
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "Absences",
+      "importance_mean": 1.0055982937604124,
+      "importance_std": 0.03555225176131059
+    },
+    {
+      "feature": "ParentalSupport",
+      "importance_mean": 0.12247280971180707,
+      "importance_std": 0.007383416444589084
+    },
+    {
+      "feature": "StudyTimeWeekly",
+      "importance_mean": 0.10126177815609791,
+      "importance_std": 0.005802581944647558
+    },
+    {
+      "feature": "Tutoring",
+      "importance_mean": 0.051886815355044594,
+      "importance_std": 0.00406526219178613
+    },
+    {
+      "feature": "Sports",
+      "importance_mean": 0.041345964410453746,
+      "importance_std": 0.0038188257608900798
+    },
+    {
+      "feature": "Extracurricular",
+      "importance_mean": 0.04001303156053846,
+      "importance_std": 0.004217173648228745
+    },
+    {
+      "feature": "Music",
+      "importance_mean": 0.011940737456586734,
+      "importance_std": 0.0032847175563936364
+    },
+    {
+      "feature": "ParentalEducation",
+      "importance_mean": 0.0005403764116015452,
+      "importance_std": 0.0003732762884460018
+    }
+  ]
+}

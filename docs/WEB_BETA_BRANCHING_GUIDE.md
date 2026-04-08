@@ -2,16 +2,24 @@
 
 ## Estado del modelo
 
-El modelo ya esta listo como prototipo de investigacion: predice GPA, calcula probabilidad de buen rendimiento (`GPA >= 2.5`) y genera recomendaciones simuladas.
+El modelo ya esta listo como base para la beta web: predice GPA, calcula probabilidad de buen rendimiento (`GPA >= 2.5`) y genera recomendaciones simuladas.
 
-Para usarlo en una web beta todavia falta convertirlo en producto:
+Ya quedo preparado:
 
-- Exportar el pipeline entrenado y el clasificador calibrado como artefactos reutilizables.
-- Separar el codigo del notebook en modulos o API.
-- Definir un contrato estable de entrada y salida.
-- Validar campos antes de predecir.
-- Mostrar mensajes de mejora sin usar variables sensibles.
-- Agregar pruebas basicas para evitar que la web muestre resultados rotos.
+- Artefactos del modelo en `models/`.
+- Servicio reutilizable en `src/student_success/`.
+- API minima en `web/backend/app.py`.
+- Frontend HTML inicial en `web/frontend/index.html`.
+- Contrato API en `docs/API_CONTRACT.md`.
+- Ejemplos en `examples/`.
+- Smoke test en `scripts/smoke_test_web_beta.py`.
+
+Lo que todavia falta para la beta:
+
+- Mejorar o reemplazar la interfaz web simple.
+- Revisar o adaptar el backend reducido si el equipo quiere cambiar rutas o estilos de respuesta.
+- Respetar el contrato estable de entrada y salida.
+- Probar frontend y backend juntos.
 
 La beta no debe decir que garantiza una calificacion. Debe presentarse como simulador de apoyo academico.
 
@@ -36,6 +44,8 @@ feature/francisco-student-ui
 feature/alan-model-api
 ```
 
+Estas ramas ya estan creadas y subidas en GitHub.
+
 Regla: nadie trabaja directo sobre `main`. Cada quien trabaja en su rama y abre pull request hacia `dev/web-beta`. Cuando la beta compile y funcione, `dev/web-beta` se integra a `main`.
 
 ## Responsable 1: Francisco
@@ -48,15 +58,23 @@ feature/francisco-student-ui
 
 Objetivo:
 
-Crear la interfaz web beta para que el estudiante capture sus datos y vea su resultado.
+Crear la interfaz web beta para que el estudiante capture sus datos y vea su resultado. No necesita implementar modelo.
+
+Base ya preparada:
+
+```text
+web/frontend/index.html
+web/frontend/README.md
+docs/API_CONTRACT.md
+```
 
 Debe construir:
 
-- Pantalla de inicio con explicacion breve del proyecto.
-- Formulario de estudiante con campos: `Age`, `StudyTimeWeekly`, `Absences`, `ParentalEducation`, `Tutoring`, `ParentalSupport`, `Extracurricular`, `Sports`, `Music`, `Volunteering`.
-- Pantalla de resultados con `GPA estimado`, `probabilidad de buen rendimiento`, `nivel de riesgo` y mensajes de mejora.
-- Estado de carga y mensaje de error si la API no responde.
-- Diseno responsive para laptop y celular.
+- Revisar y mejorar la pantalla inicial existente.
+- Revisar y mejorar el formulario existente.
+- Revisar y mejorar la pantalla de resultados existente.
+- Mantener estado de carga y mensaje de error si la API no responde.
+- Mejorar diseno responsive si alcanza el tiempo.
 
 No debe pedir en la interfaz:
 
@@ -68,9 +86,9 @@ No debe pedir en la interfaz:
 Comandos:
 
 ```bash
-git checkout dev/web-beta
-git pull origin dev/web-beta
-git checkout -b feature/francisco-student-ui
+git fetch origin
+git checkout feature/francisco-student-ui
+git pull origin feature/francisco-student-ui
 ```
 
 Cuando tenga avance:
@@ -97,16 +115,24 @@ feature/alan-model-api
 
 Objetivo:
 
-Crear el servicio que reciba los datos del estudiante, ejecute el modelo y devuelva mensajes de recomendacion.
+Mantener un backend reducido que reciba los datos del estudiante, llame el servicio del modelo y devuelva mensajes de recomendacion.
+
+Base ya preparada:
+
+```text
+web/backend/app.py
+src/student_success/
+models/
+examples/
+```
 
 Debe construir:
 
-- Endpoint de prediccion para un estudiante.
-- Validacion de entrada.
-- Carga del modelo o entrenamiento temporal desde el dataset para la beta.
-- Respuesta JSON con prediccion, probabilidad, nivel de riesgo y recomendaciones.
-- Endpoint de salud para saber si la API esta activa.
-- Pruebas basicas con uno o dos casos demo.
+- Verificar que `GET /health` funcione.
+- Verificar que `POST /predict` responda con el JSON esperado.
+- Agregar CORS adicional solo si el frontend usa otro puerto.
+- Mantener el contrato de `docs/API_CONTRACT.md`.
+- Ejecutar `python scripts/smoke_test_web_beta.py` antes de cada PR.
 
 Entrada esperada:
 
@@ -129,20 +155,20 @@ Salida esperada:
 
 ```json
 {
-  "estimated_gpa": 2.31,
-  "good_performance_probability": 0.64,
-  "risk_level": "riesgo moderado",
+  "ok": true,
+  "estimated_gpa": 2.2474,
+  "good_performance_probability": 0.1502,
+  "risk_level": "riesgo alto",
   "messages": [
-    "Reduce ausencias para mejorar tu rendimiento estimado.",
-    "Aumentar horas de estudio puede elevar tu probabilidad de buen rendimiento.",
-    "Activar tutoring puede apoyar la mejora academica."
+    "Prioriza reducir ausencias: es el factor con mayor impacto en el modelo.",
+    "Aumenta tus horas de estudio semanal de forma sostenida."
   ],
   "recommended_plan": {
-    "plan": "reducir ausencias + aumentar estudio + activar tutoring",
-    "estimated_gpa_after": 2.85,
-    "probability_after": 0.81,
-    "delta_gpa": 0.54,
-    "delta_probability": 0.17
+    "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
+    "estimated_gpa_after": 4.0,
+    "probability_after": 1.0,
+    "delta_gpa": 1.7526,
+    "delta_probability": 0.8498
   }
 }
 ```
@@ -150,9 +176,9 @@ Salida esperada:
 Comandos:
 
 ```bash
-git checkout dev/web-beta
-git pull origin dev/web-beta
-git checkout -b feature/alan-model-api
+git fetch origin
+git checkout feature/alan-model-api
+git pull origin feature/alan-model-api
 ```
 
 Cuando tenga avance:
@@ -170,6 +196,12 @@ dev/web-beta
 ```
 
 ## Contrato entre UI y API
+
+El contrato completo esta en:
+
+```text
+docs/API_CONTRACT.md
+```
 
 La UI debe enviar exactamente estos campos:
 
@@ -206,9 +238,9 @@ Reglas:
 
 ## Flujo de trabajo recomendado
 
-1. Edson crea o actualiza `dev/web-beta`.
-2. Francisco crea `feature/francisco-student-ui` desde `dev/web-beta`.
-3. Alan crea `feature/alan-model-api` desde `dev/web-beta`.
+1. Francisco trabaja en `feature/francisco-student-ui`.
+2. Alan trabaja en `feature/alan-model-api`.
+3. Ambos mantienen su rama actualizada con `git pull`.
 4. Cada quien hace commits pequenos y descriptivos.
 5. Cada quien abre pull request hacia `dev/web-beta`.
 6. Se prueba la beta completa desde `dev/web-beta`.

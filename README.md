@@ -28,6 +28,13 @@ paper/generate_paper_assets.py
 paper/figures/
 paper/tables/
 docs/WEB_BETA_BRANCHING_GUIDE.md
+docs/API_CONTRACT.md
+docs/MODEL_READY_FOR_WEB.md
+src/student_success/
+web/backend/
+web/frontend/
+examples/
+models/
 requirements.txt
 ```
 
@@ -69,6 +76,33 @@ La guia de ramas y responsabilidades para el desarrollo web beta esta en:
 
 ```text
 docs/WEB_BETA_BRANCHING_GUIDE.md
+```
+
+Contrato API:
+
+```text
+docs/API_CONTRACT.md
+```
+
+Estado del modelo para web:
+
+```text
+docs/MODEL_READY_FOR_WEB.md
+```
+
+## Como correr la API beta
+
+```bash
+pip install -r requirements.txt
+python scripts/build_model_artifacts.py
+python scripts/smoke_test_web_beta.py
+uvicorn web.backend.app:app --reload
+```
+
+Abrir documentacion interactiva:
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ## Nota etica
