@@ -1,8 +1,7 @@
-"""Generate reproducible tables and figures for the GPA paper."""
+"""Generate reproducible figures for the GPA paper."""
 
 from __future__ import annotations
 
-import json
 from itertools import product
 from pathlib import Path
 
@@ -14,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
-from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
@@ -51,7 +50,6 @@ RANDOM_STATE = 42
 DATA_PATH = Path("data/raw/student_performance.csv")
 PAPER_DIR = Path("paper")
 FIG_DIR = PAPER_DIR / "figures"
-TABLE_DIR = PAPER_DIR / "tables"
 
 TARGET = "GPA"
 GOOD_PERFORMANCE_THRESHOLD = 2.5
@@ -188,10 +186,6 @@ def cross_validation_block(pipeline, X, y) -> dict[str, float]:
         "cv_rmse": -scores["test_rmse"].mean(),
         "cv_r2": scores["test_r2"].mean(),
     }
-
-
-def save_table(df: pd.DataFrame, name: str) -> None:
-    df.to_csv(TABLE_DIR / name, index=False)
 
 
 def savefig(name: str) -> None:
@@ -344,25 +338,11 @@ def group_audit(y_true, y_pred, probabilities, groups: pd.Series, group_name: st
 
 def main() -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    TABLE_DIR.mkdir(parents=True, exist_ok=True)
-
     df = pd.read_csv(DATA_PATH)
     X = df.drop(columns=[TARGET, *DROP_COLUMNS]).copy()
     y = df[TARGET].copy()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE)
-
-    raw_summary = pd.DataFrame(
-        {
-            "column": df.columns,
-            "dtype": df.dtypes.astype(str).values,
-            "unique_values": [df[col].nunique() for col in df.columns],
-            "min": [df[col].min() for col in df.columns],
-            "max": [df[col].max() for col in df.columns],
-            "missing": [df[col].isna().sum() for col in df.columns],
-        }
-    )
-    save_table(raw_summary, "table_dataset_summary.csv")
 
     plt.figure(figsize=(7.2, 4.2))
     plt.hist(df[TARGET], bins=24, color="#4C78A8", edgecolor="white")
@@ -420,8 +400,6 @@ def main() -> None:
         fitted_pipelines[model_name] = pipeline
 
     metrics_df = pd.DataFrame(metrics_records).sort_values("test_rmse").reset_index(drop=True)
-    save_table(metrics_df, "table_regression_metrics.csv")
-
     best_model_name = metrics_df.loc[0, "model"]
     best_row = metrics_df.iloc[0]
     best_pipeline = fitted_pipelines[best_model_name]
@@ -434,8 +412,6 @@ def main() -> None:
     )
     predictions_df["residual"] = predictions_df["actual_gpa"] - predictions_df["predicted_gpa"]
     predictions_df["abs_error"] = predictions_df["residual"].abs()
-    save_table(predictions_df.reset_index(names="row_id"), "table_test_predictions.csv")
-
     plot_metrics = metrics_df.sort_values("test_rmse")
     positions = np.arange(len(plot_metrics))
     width = 0.36
@@ -455,14 +431,6 @@ def main() -> None:
     plt.ylabel("GPA predicho")
     plt.title(f"Real vs predicho ({best_model_name})")
     savefig("fig_actual_vs_predicted.png")
-
-    plt.figure(figsize=(6.4, 4.0))
-    plt.hist(predictions_df["residual"], bins=26, color="#72B7B2", edgecolor="white")
-    plt.axvline(0, color="black", linestyle="--", linewidth=1)
-    plt.xlabel("Residual")
-    plt.ylabel("Frecuencia")
-    plt.title("Distribucion de residuales")
-    savefig("fig_residual_distribution.png")
 
     importance = permutation_importance(
         best_pipeline,
@@ -484,8 +452,6 @@ def main() -> None:
         .sort_values("importance_mean", ascending=False)
         .reset_index(drop=True)
     )
-    save_table(importance_df, "table_feature_importance.csv")
-
     top_features = importance_df.head(8).sort_values("importance_mean")
     plt.figure(figsize=(7.6, 4.6))
     plt.barh(top_features["feature"], top_features["importance_mean"], xerr=top_features["importance_std"], color="#54A24B")
@@ -493,24 +459,9 @@ def main() -> None:
     plt.title("Importancia de variables por permutacion")
     savefig("fig_feature_importance.png")
 
-    xgb_similarity = None
     if "xgboost" in fitted_pipelines:
         lr_pred = pd.Series(fitted_pipelines["linear_regression"].predict(X_test), index=y_test.index)
         xgb_pred = pd.Series(fitted_pipelines["xgboost"].predict(X_test), index=y_test.index)
-        xgb_analysis_df = metrics_df[metrics_df["model"].isin(["linear_regression", "xgboost"])][
-            ["model", "train_rmse", "test_rmse", "cv_rmse", "train_r2", "test_r2", "cv_r2"]
-        ].copy()
-        xgb_analysis_df["gap_rmse"] = xgb_analysis_df["test_rmse"] - xgb_analysis_df["train_rmse"]
-        xgb_analysis_df["gap_r2"] = xgb_analysis_df["train_r2"] - xgb_analysis_df["test_r2"]
-        xgb_similarity = {
-            "mean_abs_diff_lr_vs_xgb": float((lr_pred - xgb_pred).abs().mean()),
-            "max_abs_diff_lr_vs_xgb": float((lr_pred - xgb_pred).abs().max()),
-            "prediction_correlation": float(lr_pred.corr(xgb_pred)),
-            "share_lr_better": float(((y_test - lr_pred).abs() < (y_test - xgb_pred).abs()).mean()),
-            "share_xgb_better": float(((y_test - xgb_pred).abs() < (y_test - lr_pred).abs()).mean()),
-        }
-        save_table(xgb_analysis_df, "table_xgboost_analysis.csv")
-        save_table(pd.DataFrame([xgb_similarity]), "table_xgboost_similarity.csv")
         plt.figure(figsize=(5.8, 5.2))
         plt.scatter(lr_pred, xgb_pred, alpha=0.65, color="#4C78A8", edgecolor="white", linewidth=0.4)
         min_pred = min(lr_pred.min(), xgb_pred.min())
@@ -548,8 +499,6 @@ def main() -> None:
             }
         )
     no_absences_df = pd.DataFrame(no_absences_records).sort_values("rmse_without_absences").reset_index(drop=True)
-    save_table(no_absences_df, "table_ablation_absences.csv")
-
     plot_ablation = no_absences_df.set_index("model")[["rmse_base", "rmse_without_absences"]]
     ax = plot_ablation.plot(kind="bar", figsize=(8.4, 4.6), color=["#4C78A8", "#E45756"])
     ax.set_ylabel("RMSE")
@@ -607,8 +556,6 @@ def main() -> None:
     classifier_metrics_df = pd.DataFrame(classifier_records).sort_values(
         ["cv_roc_auc", "test_brier"], ascending=[False, True]
     ).reset_index(drop=True)
-    save_table(classifier_metrics_df, "table_classifier_candidates.csv")
-
     best_classifier_name = classifier_metrics_df.loc[0, "model"]
     best_base_classifier = classifier_candidates[best_classifier_name]
     best_classifier_pipeline = CalibratedClassifierCV(
@@ -623,21 +570,16 @@ def main() -> None:
     best_classifier_pipeline.fit(X_train_adv, y_train_good)
     calibrated_probabilities = best_classifier_pipeline.predict_proba(X_test_adv)[:, 1]
     calibrated_predictions = (calibrated_probabilities >= 0.5).astype(int)
-    calibrated_metrics_df = pd.DataFrame(
-        [
-            {
-                "model": f"{best_classifier_name}_calibrated",
-                "test_roc_auc": roc_auc_score(y_test_good, calibrated_probabilities),
-                "test_avg_precision": average_precision_score(y_test_good, calibrated_probabilities),
-                "test_accuracy": accuracy_score(y_test_good, calibrated_predictions),
-                "test_precision": precision_score(y_test_good, calibrated_predictions, zero_division=0),
-                "test_recall": recall_score(y_test_good, calibrated_predictions, zero_division=0),
-                "test_f1": f1_score(y_test_good, calibrated_predictions, zero_division=0),
-                "test_brier": brier_score_loss(y_test_good, calibrated_probabilities),
-            }
-        ]
-    )
-    save_table(calibrated_metrics_df, "table_classifier_calibrated.csv")
+    calibrated_metrics = {
+        "model": f"{best_classifier_name}_calibrated",
+        "test_roc_auc": roc_auc_score(y_test_good, calibrated_probabilities),
+        "test_avg_precision": average_precision_score(y_test_good, calibrated_probabilities),
+        "test_accuracy": accuracy_score(y_test_good, calibrated_predictions),
+        "test_precision": precision_score(y_test_good, calibrated_predictions, zero_division=0),
+        "test_recall": recall_score(y_test_good, calibrated_predictions, zero_division=0),
+        "test_f1": f1_score(y_test_good, calibrated_predictions, zero_division=0),
+        "test_brier": brier_score_loss(y_test_good, calibrated_probabilities),
+    }
 
     cm = confusion_matrix(y_test_good, calibrated_predictions, labels=[0, 1])
     plt.figure(figsize=(4.8, 4.2))
@@ -664,15 +606,6 @@ def main() -> None:
     axes[1].set_title(f"Average Precision = {average_precision_score(y_test_good, calibrated_probabilities):.4f}")
     savefig("fig_roc_pr_curves.png")
 
-    prob_true, prob_pred = calibration_curve(y_test_good, calibrated_probabilities, n_bins=8, strategy="uniform")
-    plt.figure(figsize=(5.4, 4.6))
-    plt.plot(prob_pred, prob_true, marker="o", color="#54A24B", linewidth=2)
-    plt.plot([0, 1], [0, 1], color="black", linestyle="--", linewidth=1)
-    plt.xlabel("Probabilidad predicha")
-    plt.ylabel("Frecuencia observada")
-    plt.title("Curva de calibracion")
-    savefig("fig_calibration_curve.png")
-
     sensitive_test = df.loc[X_test_adv.index, ["Gender", "Ethnicity"]].copy()
     fairness_rows = []
     for sensitive_col in ["Gender", "Ethnicity"]:
@@ -686,7 +619,6 @@ def main() -> None:
             )
         )
     fairness_df = pd.DataFrame(fairness_rows)
-    save_table(fairness_df, "table_fairness_audit.csv")
 
     fig, axes = plt.subplots(1, 2, figsize=(10.2, 4.2))
     for ax, sensitive_col in zip(axes, ["Gender", "Ethnicity"]):
@@ -770,16 +702,7 @@ def main() -> None:
         .head(10)
         .reset_index(drop=True)
     )
-    save_table(recommendation_plans_df, "table_recommendation_plans.csv")
-
     best_plan = recommendation_plans_df.iloc[0]
-    rec_plot = pd.DataFrame(
-        {
-            "escenario": ["Actual", "Plan recomendado"],
-            "GPA": [best_plan["gpa_actual"], best_plan["gpa_estimado"]],
-            "Probabilidad": [best_plan["prob_actual"], best_plan["prob_estimada"]],
-        }
-    )
     fig, axes = plt.subplots(1, 2, figsize=(9.8, 4.0))
     gpa_current = float(best_plan["gpa_actual"])
     gpa_after = float(best_plan["gpa_estimado"])
@@ -820,30 +743,11 @@ def main() -> None:
     fig.suptitle("Impacto simulado del plan recomendado", y=1.08, fontsize=14)
     savefig("fig_recommendation_plan.png")
 
-    summary = {
-        "dataset": {
-            "rows": int(df.shape[0]),
-            "columns": int(df.shape[1]),
-            "missing_total": int(df.isna().sum().sum()),
-            "gpa_min": float(df[TARGET].min()),
-            "gpa_max": float(df[TARGET].max()),
-            "gpa_mean": float(df[TARGET].mean()),
-            "good_performance_threshold": GOOD_PERFORMANCE_THRESHOLD,
-            "good_performance_count": int(y_good_all.sum()),
-            "low_performance_count": int((1 - y_good_all).sum()),
-            "absences_gpa_corr": float(df["Absences"].corr(df[TARGET])),
-        },
-        "best_regression_model": best_model_name,
-        "best_regression_metrics": {key: float(best_row[key]) for key in metrics_df.columns if key != "model"},
-        "top_features": importance_df.head(5).to_dict(orient="records"),
-        "xgboost_similarity": xgb_similarity,
-        "best_classifier": f"{best_classifier_name}_calibrated",
-        "classifier_metrics": calibrated_metrics_df.iloc[0].to_dict(),
-        "best_recommendation_plan": best_plan.to_dict(),
-        "excluded_from_advice": EXCLUDED_FROM_ADVICE,
-    }
-    (PAPER_DIR / "paper_metrics_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print(json.dumps(summary, indent=2))
+    print(f"Best regression model: {best_model_name}")
+    print(f"Test RMSE: {best_row['test_rmse']:.4f}")
+    print(f"Best classifier: {best_classifier_name}_calibrated")
+    print(f"Classifier ROC AUC: {calibrated_metrics['test_roc_auc']:.4f}")
+    print(f"Top recommendation plan: {best_plan['plan']}")
 
 
 if __name__ == "__main__":
