@@ -41,7 +41,7 @@ maresesp012@gmail.com}
 \projectlogos
 
 \begin{abstract}
-Este articulo presenta un sistema predictivo e interpretable para estimar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con informacion de edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresion para estimar GPA y una tarea de clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. XGBoost produjo predicciones muy similares a las del modelo lineal, con correlacion de 0.9957, pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. La prueba de ablacion sin la variable Absences incremento el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor practico del sistema no reside solo en predecir, sino en convertir la prediccion en apoyo supervisado para estudiantes y tutores.
+Este articulo presenta un sistema de inteligencia artificial, basado en aprendizaje automatico, para predecir y analizar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con informacion de edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresion para estimar GPA y una tarea de clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. XGBoost produjo predicciones muy similares a las del modelo lineal, con correlacion de 0.9957, pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. La prueba de ablacion sin la variable Absences incremento el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor practico del sistema no reside solo en predecir, sino en convertir la prediccion en apoyo supervisado para estudiantes y tutores.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -64,7 +64,7 @@ El vacio que atiende este proyecto no es solo obtener una metrica alta, sino con
 
 \section{Datos}
 
-Se utilizo el archivo local \texttt{student\_performance.csv}. La fuente probable del dataset es Kaggle, ``Students Performance Dataset'', de Rabie El Kharoua \cite{kharoua2024students}. Esta fuente debe validarse antes de someter el articulo a una revista o congreso, ya que el archivo local no incluye metadata completa de procedencia. Aun asi, el archivo local coincide con el esquema esperado: 2,392 registros y 15 columnas.
+Se utilizo el archivo local \texttt{student\_performance.csv}. La fuente del dataset es Kaggle, ``Students Performance Dataset'', de Rabie El Kharoua \cite{kharoua2024students}. El archivo local coincide con el esquema esperado: 2,392 registros y 15 columnas.
 
 Las columnas disponibles son StudentID, Age, Gender, Ethnicity, ParentalEducation, StudyTimeWeekly, Absences, Tutoring, ParentalSupport, Extracurricular, Sports, Music, Volunteering, GPA y GradeClass. No se observaron valores faltantes. El GPA observado en el archivo local se encuentra en el rango empirico de 0.0 a 4.0, con media 1.9062. Para construir el objetivo de clasificacion se definio buen rendimiento como GPA $\geq 2.5$, con 706 estudiantes en la clase positiva y 1,686 por debajo del umbral.
 
@@ -246,16 +246,9 @@ El clasificador calibrado obtuvo ROC AUC = 0.9871, Average Precision = 0.9704, A
 \label{fig:roc_pr}
 \end{figure}
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_calibration_curve.png}
-\caption{Curva de calibracion de probabilidades.}
-\label{fig:calibration}
-\end{figure}
-
 \subsection{Recomendaciones para el estudiante}
 
-En un caso de alto riesgo, el sistema recomendo un plan intensivo: reducir ausencias a maximo 5, aumentar estudio hasta 20 horas semanales, activar tutorias, aumentar apoyo parental en 2 niveles y activar una actividad extracurricular. Bajo esta simulacion, el GPA estimado paso de 0.0000 a 3.6590 y la probabilidad de buen rendimiento paso de aproximadamente 0.0\% a 99.96\%. Este resultado no debe interpretarse como garantia causal, sino como una simulacion para priorizar acciones.
+En un caso de riesgo moderado-alto, el sistema recomendo un plan intensivo: reducir ausencias en 10, aumentar estudio hasta 20 horas semanales, activar tutorias, aumentar apoyo parental en 1 nivel y activar una actividad extracurricular. Bajo esta simulacion, el GPA estimado paso de 2.2783 a 4.0000 y la probabilidad de buen rendimiento paso de 14.85\% a 99.999\%. Este resultado no debe interpretarse como garantia causal, sino como una simulacion del modelo para priorizar acciones.
 
 \begin{figure}[!t]
 \centering
@@ -287,7 +280,7 @@ El componente de recomendacion mejora la utilidad del proyecto porque transforma
 
 El sistema no debe usarse para sancionar, excluir o etiquetar automaticamente estudiantes. Sus salidas son simulaciones del modelo, no decisiones academicas definitivas. Ademas, aunque se excluyen Gender y Ethnicity del motor de recomendaciones, el conjunto de datos puede contener sesgos historicos o relaciones indirectas entre variables. Por ello, el uso institucional requeriria auditoria periodica, revision humana y validacion con datos locales.
 
-Existen varias limitaciones. Primero, la fuente exacta del dataset debe confirmarse antes de una publicacion formal, aunque la fuente probable es Kaggle \cite{kharoua2024students}. Segundo, el conjunto de datos es transversal y no longitudinal; por tanto, el modelo no estima evolucion temporal. Tercero, las recomendaciones son contrafactuales simples, no evidencia causal. Cuarto, faltan variables relevantes como salud, carga academica, condiciones socioeconomicas, calidad docente y contexto institucional. Quinto, el caso de demostracion intensivo maximiza rendimiento bajo reglas simuladas, pero su factibilidad real dependera del estudiante, tutor y escuela.
+Existen varias limitaciones. Primero, aunque la fuente del dataset fue confirmada como Kaggle \cite{kharoua2024students}, antes de uso institucional se requiere validacion con datos escolares locales. Segundo, el conjunto de datos es transversal y no longitudinal; por tanto, el modelo no estima evolucion temporal. Tercero, las recomendaciones son contrafactuales simples, no evidencia causal. Cuarto, faltan variables relevantes como salud, carga academica, condiciones socioeconomicas, calidad docente y contexto institucional. Quinto, el caso de demostracion intensivo maximiza rendimiento bajo reglas simuladas, pero su factibilidad real dependera del estudiante, tutor y escuela.
 
 \section{Conclusiones}
 
@@ -297,7 +290,7 @@ La contribucion practica del proyecto es conectar prediccion y accion: el sistem
 
 \section*{Disponibilidad}
 
-El repositorio del proyecto se encuentra en: \url{https://github.com/Edson-Zepeda/proyecto-gpa}. Las figuras y tablas del paper se generan mediante \texttt{paper/generate\_paper\_assets.py}.
+El repositorio del proyecto se encuentra en: \url{https://github.com/Edson-Zepeda/Prepa-Team}. Las figuras y tablas del paper se generan mediante \texttt{paper/generate\_paper\_assets.py}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

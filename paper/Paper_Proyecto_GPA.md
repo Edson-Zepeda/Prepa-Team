@@ -3,13 +3,13 @@
 **Autores:** Edson Manuel Zepeda Chávez, Francisco Ricardo Moreno Sánchez, Alan Emir Martínez Espinosa<br>
 **Correos:** rmcedson09@gmail.com, fmorenosanchez39@gmail.com, maresesp012@gmail.com<br>
 **Afiliaciones:** Edson Manuel Zepeda Chávez: Samsung Innovation Campus 2025-2026, Universidad de Colima, Bachillerato 16; Francisco Ricardo Moreno Sánchez: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262; Alan Emir Martínez Espinosa: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262<br>
-**Repositorio:** https://github.com/Edson-Zepeda/proyecto-gpa<br>
+**Repositorio:** https://github.com/Edson-Zepeda/Prepa-Team<br>
 **Formato principal:** LaTeX IEEE/IMRaD en `Paper_Proyecto_GPA.tex`
 
 
 ## Resumen
 
-Este articulo presenta un sistema predictivo e interpretable para estimar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un dataset tabular de 2,392 estudiantes y 15 variables, incluyendo edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina regresion para estimar GPA y clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como `GPA >= 2.5`.
+Este articulo presenta un sistema de inteligencia artificial, basado en aprendizaje automatico, para predecir y analizar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un dataset tabular de 2,392 estudiantes y 15 variables, incluyendo edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina regresion para estimar GPA y clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como `GPA >= 2.5`.
 
 El mejor modelo de regresion fue `LinearRegression`, con `RMSE = 0.1963` y `R2 = 0.9534` en prueba. `XGBoost` produjo predicciones muy similares a las del modelo lineal (`correlacion = 0.9957`), pero mostro mayor brecha entre entrenamiento y prueba, por lo que no generalizo mejor. Al quitar `Absences`, el RMSE del modelo lineal subio de `0.1963` a `0.8692`, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento.
 
@@ -33,7 +33,7 @@ El archivo local `student_performance.csv` contiene:
 - `706` estudiantes con `GPA >= 2.5`
 - `1686` estudiantes con `GPA < 2.5`
 
-La fuente probable del dataset es Kaggle, **Students Performance Dataset**, de Rabie El Kharoua. Antes de una publicacion formal debe confirmarse la procedencia exacta del archivo local.
+La fuente del dataset es Kaggle, **Students Performance Dataset**, de Rabie El Kharoua.
 
 ![Distribucion del GPA](figures/fig_gpa_distribution.png)
 
@@ -144,17 +144,15 @@ El mejor clasificador calibrado fue `logistic_regression_calibrated`.
 
 ![Curvas ROC y PR](figures/fig_roc_pr_curves.png)
 
-![Curva de calibracion](figures/fig_calibration_curve.png)
-
 ### 4.5 Recomendaciones para el estudiante
 
-En un caso de alto riesgo, el mejor plan simulado fue:
+En un caso de riesgo moderado-alto, el mejor plan simulado fue:
 
 ```text
-reducir ausencias a maximo 5
+reducir ausencias en 10
 aumentar estudio hasta 20h/semana
 activar tutoring
-aumentar apoyo parental en 2
+aumentar apoyo parental en 1
 activar Extracurricular
 ```
 
@@ -162,7 +160,7 @@ Impacto estimado:
 
 | GPA actual | GPA estimado | Prob. actual | Prob. estimada |
 |---:|---:|---:|---:|
-| 0.0000 | 3.6590 | 0.0% | 99.96% |
+| 2.2783 | 4.0000 | 14.85% | 99.999% |
 
 Este resultado es una simulacion, no una garantia causal.
 
@@ -186,7 +184,7 @@ El sistema no debe usarse para sancionar, excluir o etiquetar automaticamente es
 
 Limitaciones principales:
 
-- La fuente exacta del dataset debe confirmarse antes de publicar formalmente.
+- Antes de uso institucional se requiere validacion con datos escolares locales.
 - El dataset no es longitudinal.
 - Las recomendaciones son contrafactuales simples.
 - Faltan variables de contexto como salud, carga academica, nivel socioeconomico y calidad docente.

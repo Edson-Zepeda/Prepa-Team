@@ -41,7 +41,7 @@ maresesp012@gmail.com}
 \projectlogos
 
 \begin{abstract}
-This article presents a predictive and interpretable system for estimating student academic performance and translating model outputs into actionable early-intervention recommendations. The study uses a tabular dataset of 2,392 students and 15 variables, including age, weekly study time, absences, tutoring, parental support, extracurricular activities, and GPA. The proposed approach combines two complementary tasks: a regression task to estimate GPA and a calibrated classification task to estimate the probability of achieving good academic performance, defined as GPA $\geq 2.5$. LinearRegression, Random Forest, SVR, and XGBoost were compared. The best regression model was LinearRegression, with RMSE = 0.1963 and $R^2$ = 0.9534 on the test set. XGBoost produced predictions highly similar to those of the linear model, with a correlation of 0.9957, but it showed a larger train-test gap and therefore did not generalize better. An ablation test removing the Absences variable increased the linear model RMSE from 0.1963 to 0.8692, confirming that absences are the dominant factor in the dataset. Finally, a recommendation engine was implemented to simulate feasible interventions, exclude sensitive or non-actionable variables, and prioritize actions by their estimated impact on GPA and probability of good performance. The results suggest that the practical value of the system is not only prediction, but the conversion of predictive outputs into supervised support for students and tutors.
+This article presents an artificial intelligence system, based on machine learning, for predicting and analyzing student academic performance and translating model outputs into actionable early-intervention recommendations. The study uses a tabular dataset of 2,392 students and 15 variables, including age, weekly study time, absences, tutoring, parental support, extracurricular activities, and GPA. The proposed approach combines two complementary tasks: a regression task to estimate GPA and a calibrated classification task to estimate the probability of achieving good academic performance, defined as GPA $\geq 2.5$. LinearRegression, Random Forest, SVR, and XGBoost were compared. The best regression model was LinearRegression, with RMSE = 0.1963 and $R^2$ = 0.9534 on the test set. XGBoost produced predictions highly similar to those of the linear model, with a correlation of 0.9957, but it showed a larger train-test gap and therefore did not generalize better. An ablation test removing the Absences variable increased the linear model RMSE from 0.1963 to 0.8692, confirming that absences are the dominant factor in the dataset. Finally, a recommendation engine was implemented to simulate feasible interventions, exclude sensitive or non-actionable variables, and prioritize actions by their estimated impact on GPA and probability of good performance. The results suggest that the practical value of the system is not only prediction, but the conversion of predictive outputs into supervised support for students and tutors.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -246,16 +246,9 @@ The calibrated classifier obtained ROC AUC = 0.9871, Average Precision = 0.9704,
 \label{fig:roc_pr}
 \end{figure}
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_calibration_curve.png}
-\caption{Probability calibration curve.}
-\label{fig:calibration}
-\end{figure}
-
 \subsection{Student Recommendations}
 
-For a high-risk case, the system recommended an intensive plan: reduce absences to a maximum of 5, increase study time up to 20 hours per week, enable tutoring, increase parental support by 2 levels, and enable an extracurricular activity. Under this simulation, the estimated GPA increased from 0.0000 to 3.6590, and the probability of good performance increased from approximately 0.0\% to 99.96\%. This result must not be interpreted as a causal guarantee, but as a simulation for prioritizing actions.
+For a moderate-to-high risk case, the system recommended an intensive plan: reduce absences by 10, increase study time up to 20 hours per week, enable tutoring, increase parental support by 1 level, and enable an extracurricular activity. Under this simulation, the estimated GPA increased from 2.2783 to 4.0000, and the probability of good performance increased from 14.85\% to 99.999\%. This result must not be interpreted as a causal guarantee, but as a model simulation for prioritizing actions.
 
 \begin{figure}[!t]
 \centering
@@ -287,7 +280,7 @@ The recommendation component improves the usefulness of the project because it t
 
 The system must not be used to sanction, exclude, or automatically label students. Its outputs are model-based simulations, not definitive academic decisions. In addition, although Gender and Ethnicity are excluded from the recommendation engine, the dataset may still contain historical biases or indirect relationships between variables. Therefore, institutional use would require periodic auditing, human review, and validation with local data.
 
-There are several limitations. First, the dataset source should be fully documented before formal submission, even though the confirmed source is Kaggle \cite{kharoua2024students}. Second, the dataset is cross-sectional rather than longitudinal; therefore, the model does not estimate student evolution over time. Third, the recommendations are simple counterfactual simulations, not causal evidence. Fourth, relevant variables such as health, academic workload, socioeconomic conditions, teaching quality, and institutional context are not available. Fifth, the intensive demonstration plan maximizes performance under simulated rules, but its real feasibility depends on the student, tutor, and school.
+There are several limitations. First, although the dataset source was confirmed as Kaggle \cite{kharoua2024students}, institutional use would require validation with local school data. Second, the dataset is cross-sectional rather than longitudinal; therefore, the model does not estimate student evolution over time. Third, the recommendations are simple counterfactual simulations, not causal evidence. Fourth, relevant variables such as health, academic workload, socioeconomic conditions, teaching quality, and institutional context are not available. Fifth, the intensive demonstration plan maximizes performance under simulated rules, but its real feasibility depends on the student, tutor, and school.
 
 \section{Conclusions}
 
@@ -297,7 +290,7 @@ The practical contribution of the project is the connection between prediction a
 
 \section*{Availability}
 
-The project repository is available at: \url{https://github.com/Edson-Zepeda/proyecto-gpa}. The paper figures and tables are generated using \texttt{paper/generate\_paper\_assets.py}.
+The project repository is available at: \url{https://github.com/Edson-Zepeda/Prepa-Team}. The paper figures and tables are generated using \texttt{paper/generate\_paper\_assets.py}.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

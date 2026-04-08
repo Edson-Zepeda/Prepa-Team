@@ -667,9 +667,28 @@ def main() -> None:
     case_pool = X_test_adv.copy()
     case_pool["predicted_probability"] = calibrated_probabilities
     case_pool["predicted_gpa"] = advice_regressor.predict(X_test_adv)
-    current_case = case_pool.sort_values(
-        ["predicted_probability", "predicted_gpa", "Absences", "StudyTimeWeekly"], ascending=[True, True, False, True]
-    ).iloc[0][ADVICE_FEATURES].copy()
+
+    # Select a realistic at-risk case rather than the most extreme one. This makes
+    # the recommendation figure easier to interpret in the paper.
+    candidate_pool = case_pool[
+        case_pool["predicted_probability"].between(0.03, 0.45)
+        & case_pool["predicted_gpa"].between(0.8, GOOD_PERFORMANCE_THRESHOLD)
+        & (case_pool["Absences"] >= 10)
+    ].copy()
+    if candidate_pool.empty:
+        candidate_pool = case_pool[
+            (case_pool["predicted_probability"] < 0.45)
+            & (case_pool["predicted_gpa"] < GOOD_PERFORMANCE_THRESHOLD)
+        ].copy()
+    if candidate_pool.empty:
+        candidate_pool = case_pool.copy()
+
+    candidate_pool["selection_score"] = (
+        (candidate_pool["predicted_probability"] - 0.15).abs()
+        + ((candidate_pool["predicted_gpa"] - 1.8).abs() / 4)
+        + np.where(candidate_pool["Absences"] < 10, 1, 0)
+    )
+    current_case = candidate_pool.sort_values("selection_score").iloc[0][ADVICE_FEATURES].copy()
 
     current_gpa = float(np.clip(advice_regressor.predict(pd.DataFrame([current_case]))[0], 0, 4))
     current_prob = float(best_classifier_pipeline.predict_proba(pd.DataFrame([current_case]))[0, 1])
@@ -718,17 +737,22 @@ def main() -> None:
             "Probabilidad": [best_plan["prob_actual"], best_plan["prob_estimada"]],
         }
     )
-    fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.0))
-    axes[0].bar(rec_plot["escenario"], rec_plot["GPA"], color=["#E45756", "#54A24B"])
-    axes[0].set_ylim(0, 4)
-    axes[0].set_title("Cambio estimado de GPA")
+    fig, axes = plt.subplots(1, 2, figsize=(9.4, 4.0))
+    gpa_bars = axes[0].bar(rec_plot["escenario"], rec_plot["GPA"], color=["#E45756", "#54A24B"])
+    axes[0].set_ylim(0, 4.4)
+    axes[0].set_title("GPA estimado", fontsize=12)
     axes[0].set_ylabel("GPA")
-    axes[1].bar(rec_plot["escenario"], rec_plot["Probabilidad"] * 100, color=["#E45756", "#54A24B"])
-    axes[1].set_ylim(0, 100)
-    axes[1].set_title("Probabilidad de GPA >= 2.5")
+    axes[0].bar_label(gpa_bars, labels=[f"{value:.2f}" for value in rec_plot["GPA"]], padding=3)
+    probability_bars = axes[1].bar(
+        rec_plot["escenario"], rec_plot["Probabilidad"] * 100, color=["#E45756", "#54A24B"]
+    )
+    axes[1].set_ylim(0, 110)
+    axes[1].set_title("Probabilidad GPA >= 2.5", fontsize=12)
     axes[1].set_ylabel("Porcentaje")
+    axes[1].bar_label(probability_bars, labels=[f"{value * 100:.1f}%" for value in rec_plot["Probabilidad"]], padding=3)
     for ax in axes:
         ax.tick_params(axis="x", rotation=10)
+    fig.suptitle("Impacto simulado del plan recomendado", y=1.02, fontsize=14)
     savefig("fig_recommendation_plan.png")
 
     summary = {

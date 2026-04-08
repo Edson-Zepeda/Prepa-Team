@@ -3,14 +3,14 @@
 **Authors:** Edson Manuel Zepeda Chavez, Francisco Ricardo Moreno Sanchez, Alan Emir Martinez Espinosa<br>
 **Emails:** rmcedson09@gmail.com, fmorenosanchez39@gmail.com, maresesp012@gmail.com<br>
 **Affiliations:** Edson Manuel Zepeda Chavez: Samsung Innovation Campus 2025-2026, Universidad de Colima, Bachillerato 16; Francisco Ricardo Moreno Sanchez: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262; Alan Emir Martinez Espinosa: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262<br>
-**Repository:** https://github.com/Edson-Zepeda/proyecto-gpa<br>
+**Repository:** https://github.com/Edson-Zepeda/Prepa-Team<br>
 **Main format:** IEEE/IMRaD LaTeX in `Paper_GPA_English.tex`
 
 > Optional logos: the English LaTeX file uses `logo_udem.png` and `logo_sic.png` from `paper/figures/` if they exist.
 
 ## Abstract
 
-This article presents a predictive and interpretable system for estimating student academic performance and translating model outputs into actionable early-intervention recommendations. The study uses a tabular dataset of 2,392 students and 15 variables, including age, weekly study time, absences, tutoring, parental support, extracurricular activities, and GPA. The approach combines regression for GPA estimation and calibrated classification for estimating the probability of achieving good performance, defined as `GPA >= 2.5`.
+This article presents an artificial intelligence system, based on machine learning, for predicting and analyzing student academic performance and translating model outputs into actionable early-intervention recommendations. The study uses a tabular dataset of 2,392 students and 15 variables, including age, weekly study time, absences, tutoring, parental support, extracurricular activities, and GPA. The approach combines regression for GPA estimation and calibrated classification for estimating the probability of achieving good performance, defined as `GPA >= 2.5`.
 
 The best regression model was `LinearRegression`, with `RMSE = 0.1963` and `R2 = 0.9534` on the test set. `XGBoost` produced predictions highly similar to those of the linear model (`correlation = 0.9957`), but it showed a larger train-test gap and therefore did not generalize better. Removing `Absences` increased the linear model RMSE from `0.1963` to `0.8692`, confirming that absences are the dominant factor. Finally, a recommendation engine was implemented to simulate interventions, exclude sensitive or non-actionable variables, and prioritize actions with the highest estimated impact on GPA and probability of good performance.
 
@@ -145,17 +145,15 @@ The best calibrated classifier was `logistic_regression_calibrated`.
 
 ![ROC and PR curves](figures/fig_roc_pr_curves.png)
 
-![Calibration curve](figures/fig_calibration_curve.png)
-
 ### 4.5 Student Recommendations
 
-For a high-risk case, the best simulated plan was:
+For a moderate-to-high risk case, the best simulated plan was:
 
 ```text
-reduce absences to a maximum of 5
+reduce absences by 10
 increase study time up to 20h/week
 enable tutoring
-increase parental support by 2
+increase parental support by 1
 enable Extracurricular
 ```
 
@@ -163,7 +161,7 @@ Estimated impact:
 
 | Current GPA | Estimated GPA | Current probability | Estimated probability |
 |---:|---:|---:|---:|
-| 0.0000 | 3.6590 | 0.0% | 99.96% |
+| 2.2783 | 4.0000 | 14.85% | 99.999% |
 
 This result is a simulation, not a causal guarantee.
 
@@ -187,7 +185,7 @@ The system must not be used to sanction, exclude, or automatically label student
 
 Main limitations:
 
-- The dataset source should remain documented in the paper.
+- Institutional use requires validation with local school data.
 - The dataset is not longitudinal.
 - The recommendations are simple counterfactual simulations.
 - Context variables such as health, academic workload, socioeconomic status, and teaching quality are missing.
