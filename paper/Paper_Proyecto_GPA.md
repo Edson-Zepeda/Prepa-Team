@@ -2,7 +2,7 @@
 
 **Autores:** Edson Manuel Zepeda Chávez, Francisco Ricardo Moreno Sánchez, Alan Emir Martínez Espinosa<br>
 **Correos:** rmcedson09@gmail.com, fmorenosanchez39@gmail.com, maresesp012@gmail.com<br>
-**Afiliacion:** Samsung Innovation Campus 2025-2026<br>
+**Afiliaciones:** Edson Manuel Zepeda Chávez: Samsung Innovation Campus 2025-2026, Universidad de Colima, Bachillerato 16; Francisco Ricardo Moreno Sánchez: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262; Alan Emir Martínez Espinosa: Samsung Innovation Campus 2025-2026, CONALEP Plantel 262<br>
 **Repositorio:** https://github.com/Edson-Zepeda/proyecto-gpa<br>
 **Formato principal:** LaTeX IEEE/IMRaD en `Paper_Proyecto_GPA.tex`
 
