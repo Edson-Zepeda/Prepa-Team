@@ -98,6 +98,36 @@ def build_pipeline(model, numeric_features: list[str], categorical_features: lis
     )
 
 
+def build_tree_preprocessor(features: list[str]) -> ColumnTransformer:
+    return ColumnTransformer(
+        transformers=[
+            (
+                "tree_features",
+                Pipeline([("imputer", SimpleImputer(strategy="most_frequent"))]),
+                features,
+            )
+        ],
+        remainder="drop",
+    )
+
+
+def build_tree_pipeline(model, features: list[str]) -> Pipeline:
+    return Pipeline(
+        [
+            ("preprocessor", build_tree_preprocessor(features)),
+            ("model", model),
+        ]
+    )
+
+
+def build_model_pipeline(model, numeric_features: list[str], categorical_features: list[str]) -> Pipeline:
+    if XGBRegressor is not None and isinstance(model, XGBRegressor):
+        return build_tree_pipeline(model, numeric_features + categorical_features)
+    if XGBClassifier is not None and isinstance(model, XGBClassifier):
+        return build_tree_pipeline(model, numeric_features + categorical_features)
+    return build_pipeline(model, numeric_features, categorical_features)
+
+
 def metric_block(y_true: pd.Series, y_pred: np.ndarray, prefix: str) -> dict[str, float]:
     mse = mean_squared_error(y_true, y_pred)
     return {
@@ -138,12 +168,17 @@ def regression_candidates() -> dict[str, object]:
         candidates["xgboost"] = XGBRegressor(
             objective="reg:squarederror",
             n_estimators=400,
-            learning_rate=0.05,
-            max_depth=4,
+            learning_rate=0.08,
+            max_depth=2,
+            min_child_weight=5,
             subsample=0.9,
-            colsample_bytree=0.9,
+            colsample_bytree=0.7,
+            gamma=0.0,
+            reg_alpha=0.0,
+            reg_lambda=1.5,
             random_state=RANDOM_STATE,
             n_jobs=-1,
+            tree_method="hist",
         )
     return candidates
 
@@ -171,12 +206,14 @@ def classifier_candidates() -> dict[str, object]:
         candidates["xgboost_classifier"] = XGBClassifier(
             objective="binary:logistic",
             eval_metric="logloss",
-            n_estimators=500,
-            learning_rate=0.03,
+            n_estimators=1000,
+            learning_rate=0.02,
             max_depth=2,
-            subsample=0.9,
+            subsample=0.8,
             colsample_bytree=0.8,
-            min_child_weight=3,
+            min_child_weight=1,
+            gamma=0.05,
+            reg_alpha=0.0,
             reg_lambda=2.0,
             random_state=RANDOM_STATE,
             n_jobs=-1,
@@ -198,7 +235,7 @@ def train_regression_models(df: pd.DataFrame) -> tuple[Pipeline, pd.DataFrame, p
     records = []
     fitted = {}
     for model_name, model in regression_candidates().items():
-        pipeline = build_pipeline(model, REGRESSION_NUMERIC_FEATURES, REGRESSION_CATEGORICAL_FEATURES)
+        pipeline = build_model_pipeline(model, REGRESSION_NUMERIC_FEATURES, REGRESSION_CATEGORICAL_FEATURES)
         pipeline.fit(x_train, y_train)
         train_predictions = pipeline.predict(x_train)
         test_predictions = pipeline.predict(x_test)
@@ -230,7 +267,7 @@ def train_advice_models(df: pd.DataFrame) -> tuple[CalibratedClassifierCV, Pipel
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     candidates = classifier_candidates()
     for model_name, model in candidates.items():
-        pipeline = build_pipeline(model, ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES)
+        pipeline = build_model_pipeline(model, ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES)
         pipeline.fit(x_train, y_train)
         probabilities = pipeline.predict_proba(x_test)[:, 1]
         predictions = (probabilities >= 0.5).astype(int)
@@ -271,7 +308,7 @@ def train_advice_models(df: pd.DataFrame) -> tuple[CalibratedClassifierCV, Pipel
     best_name = metrics.loc[0, "model"]
 
     classifier = CalibratedClassifierCV(
-        estimator=build_pipeline(candidates[best_name], ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES),
+        estimator=build_model_pipeline(candidates[best_name], ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES),
         method="sigmoid",
         cv=5,
     )
