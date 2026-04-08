@@ -18,8 +18,27 @@ El notebook busca:
 ```text
 Proyecto_GPA.ipynb
 data/raw/student_performance.csv
+paper/Paper_Proyecto_GPA.md
+paper/Paper_Proyecto_GPA.tex
+paper/references.bib
 requirements.txt
 ```
+
+## Paper
+
+El borrador formal del articulo esta en Markdown:
+
+```text
+paper/Paper_Proyecto_GPA.md
+```
+
+La version para compilar en LaTeX esta en:
+
+```text
+paper/Paper_Proyecto_GPA.tex
+```
+
+Para generar PDF, sube la carpeta `paper/` a Overleaf o usa una instalacion local de LaTeX. En esta maquina no esta instalado `pdflatex`.
 
 ## Como ejecutarlo
 
@@ -33,4 +52,3 @@ En VS Code tambien puede abrirse el notebook y ejecutarse con `Run All`.
 ## Nota
 
 El motor de recomendaciones evita usar variables sensibles o no accionables como `Gender`, `Ethnicity`, `StudentID` y `GradeClass` para sugerir acciones. Las recomendaciones son simulaciones del modelo y deben usarse como apoyo, no como decision automatica.
-
