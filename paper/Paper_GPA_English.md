@@ -1,4 +1,4 @@
-# A Predictive and Interpretable System for Academic Intervention Recommendations Based on GPA
+# Prediction and Analysis of Academic Performance Using Artificial Intelligence
 
 **Authors:** Edson Manuel Zepeda Chavez, Francisco Ricardo Moreno Sanchez, Alan Emir Martinez Espinosa<br>
 **Emails:** rmcedson09@gmail.com, fmorenosanchez39@gmail.com, maresesp012@gmail.com<br>

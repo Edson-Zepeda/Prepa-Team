@@ -1,4 +1,4 @@
-# Sistema predictivo e interpretable para recomendacion de intervenciones academicas basadas en GPA
+# Predicción y Análisis de Rendimiento Académico mediante Inteligencia Artificial
 
 **Autores:** Edson Manuel Zepeda Chávez, Francisco Ricardo Moreno Sánchez, Alan Emir Martínez Espinosa<br>
 **Correos:** rmcedson09@gmail.com, fmorenosanchez39@gmail.com, maresesp012@gmail.com<br>
@@ -6,7 +6,6 @@
 **Repositorio:** https://github.com/Edson-Zepeda/proyecto-gpa<br>
 **Formato principal:** LaTeX IEEE/IMRaD en `Paper_Proyecto_GPA.tex`
 
-> Logos opcionales: para incluir logos en la version PDF, coloca `logo_udem.png` y/o `logo_sic.png` dentro de `paper/figures/`. El archivo LaTeX ya esta preparado para mostrarlos si existen.
 
 ## Resumen
 
