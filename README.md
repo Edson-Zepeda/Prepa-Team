@@ -21,6 +21,8 @@ Proyecto_GPA.ipynb
 data/raw/student_performance.csv
 paper/Paper_Proyecto_GPA.md
 paper/Paper_Proyecto_GPA.tex
+paper/Paper_GPA_English.md
+paper/Paper_GPA_English.tex
 paper/references.bib
 paper/generate_paper_assets.py
 paper/figures/
@@ -58,7 +60,9 @@ Esta maquina no tiene `pdflatex` ni `pandoc` instalados, por lo que el PDF se de
 Pasos:
 
 1. Subir la carpeta `paper/` completa a Overleaf.
-2. Abrir `Paper_Proyecto_GPA.tex` como archivo principal.
+2. Abrir el archivo principal que quieras compilar:
+   - Espanol: `Paper_Proyecto_GPA.tex`
+   - Ingles: `Paper_GPA_English.tex`
 3. Compilar con BibTeX habilitado para usar `references.bib`.
 4. Descargar el PDF generado.
 
