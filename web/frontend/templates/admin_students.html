@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Alumnos · {{ school_name }}{% endblock %}
+{% block heading %}Gestión de alumnos{% endblock %}
+{% block subtitle %}Alta, consulta y seguimiento académico por alumno.{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <form method="get" action="/admin/students" class="form-grid">
+      <label>Buscar por nombre o código
+        <input name="search" value="{{ search }}" placeholder="Ej. A001 o María López" />
+      </label>
+      <div class="actions" style="align-items:end;">
+        <button type="submit">Buscar</button>
+        <a class="btn secondary" href="/admin/students/new">Crear alumno</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" style="margin-top:20px;">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Grupo</th>
+            <th>Periodo</th>
+            <th>Promedio</th>
+            <th>Cuenta</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+            <tr>
+              <td>{{ student.student_code }}</td>
+              <td><a href="/admin/students/{{ student.id }}">{{ student.full_name }}</a></td>
+              <td>{{ student.group_name or "—" }}</td>
+              <td>{{ student.current_period or "—" }}</td>
+              <td>{{ student.school_average if student.school_average is not none else "—" }}</td>
+              <td>{{ student.account_email or "Sin cuenta" }}</td>
+              <td>
+                <span class="status-pill {{ 'status-ok' if student.is_active else 'status-danger' }}">
+                  {{ "Activo" if student.is_active else "Inactivo" }}
+                </span>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7">No hay alumnos para mostrar.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

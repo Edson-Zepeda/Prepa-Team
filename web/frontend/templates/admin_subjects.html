@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Materias · {{ school_name }}{% endblock %}
+{% block heading %}Catálogo de materias{% endblock %}
+{% block subtitle %}Crea materias disponibles para captura e importación de calificaciones.{% endblock %}
+
+{% block content %}
+  <section class="grid two-col">
+    <article class="card">
+      <h2>Nueva materia</h2>
+      <form method="post" action="/admin/subjects">
+        <label>Nombre de la materia
+          <input name="subject_name" required placeholder="Ej. Matemáticas" />
+        </label>
+        <div class="actions">
+          <button type="submit">Guardar materia</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card">
+      <h2>Materias registradas</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subject in subjects %}
+              <tr>
+                <td>{{ subject.name }}</td>
+                <td>{{ "Activa" if subject.is_active else "Inactiva" }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="2">Sin materias registradas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+{% endblock %}

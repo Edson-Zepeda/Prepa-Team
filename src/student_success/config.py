@@ -1,13 +1,16 @@
 from pathlib import Path
 
 RANDOM_STATE = 42
-DATA_PATH = Path("data/raw/student_performance.csv")
-MODEL_DIR = Path("models")
+ROOT_DIR = Path(__file__).resolve().parents[2]
+DATA_PATH = ROOT_DIR / "data" / "raw" / "student_performance.csv"
+MODEL_DIR = ROOT_DIR / "models"
 ARTIFACT_PATH = MODEL_DIR / "student_success_artifacts.joblib"
 METADATA_PATH = MODEL_DIR / "student_success_metadata.json"
 
 TARGET = "GPA"
-GOOD_PERFORMANCE_THRESHOLD = 2.5
+MEXICAN_SCALE_FACTOR = 2.5
+GOOD_PERFORMANCE_THRESHOLD_10 = 6.0
+GOOD_PERFORMANCE_THRESHOLD = GOOD_PERFORMANCE_THRESHOLD_10 / MEXICAN_SCALE_FACTOR
 
 DROP_COLUMNS = ["StudentID", "GradeClass"]
 REGRESSION_NUMERIC_FEATURES = ["Age", "StudyTimeWeekly", "Absences"]

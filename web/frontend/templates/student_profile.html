@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Mi perfil · {{ school_name }}{% endblock %}
+{% block heading %}Mi perfil{% endblock %}
+{% block subtitle %}Completa tus datos para obtener recomendaciones.{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h2>{{ student.full_name }}</h2>
+    <p class="muted">Estos datos complementan tu seguimiento y no cambian tus calificaciones oficiales.</p>
+    <form method="post" action="/student/profile">
+      <div class="form-grid">
+        <label>Edad
+          <input name="age" type="number" min="10" max="25" required value="{{ profile.age or 17 }}" />
+        </label>
+        <label>Horas de estudio por semana
+          <input name="study_time_weekly" type="number" step="0.5" min="0" max="20" required value="{{ profile.study_time_weekly or 8 }}" />
+        </label>
+        <label>Ausencias
+          <input name="absences" type="number" min="0" max="30" required value="{{ profile.absences or 0 }}" />
+        </label>
+        <label>Educacion parental
+          <input name="parental_education" type="number" min="0" max="4" required value="{{ profile.parental_education or 0 }}" />
+        </label>
+        <label>Tutoria
+          <select name="tutoring">
+            <option value="0" {% if not profile.tutoring %}selected{% endif %}>No</option>
+            <option value="1" {% if profile.tutoring == 1 %}selected{% endif %}>Si</option>
+          </select>
+        </label>
+        <label>Apoyo parental
+          <input name="parental_support" type="number" min="0" max="4" required value="{{ profile.parental_support or 0 }}" />
+        </label>
+        <label>Actividad extracurricular
+          <select name="extracurricular">
+            <option value="0" {% if not profile.extracurricular %}selected{% endif %}>No</option>
+            <option value="1" {% if profile.extracurricular == 1 %}selected{% endif %}>Si</option>
+          </select>
+        </label>
+        <label>Deportes
+          <select name="sports">
+            <option value="0" {% if not profile.sports %}selected{% endif %}>No</option>
+            <option value="1" {% if profile.sports == 1 %}selected{% endif %}>Si</option>
+          </select>
+        </label>
+        <label>Musica
+          <select name="music">
+            <option value="0" {% if not profile.music %}selected{% endif %}>No</option>
+            <option value="1" {% if profile.music == 1 %}selected{% endif %}>Si</option>
+          </select>
+        </label>
+        <label>Voluntariado
+          <select name="volunteering">
+            <option value="0" {% if not profile.volunteering %}selected{% endif %}>No</option>
+            <option value="1" {% if profile.volunteering == 1 %}selected{% endif %}>Si</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit">Guardar perfil</button>
+        <a class="btn secondary" href="/student/dashboard">Volver</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

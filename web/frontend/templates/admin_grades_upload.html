@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Importar CSV · {{ school_name }}{% endblock %}
+{% block heading %}Importación de calificaciones{% endblock %}
+{% block subtitle %}Carga lotes masivos con esquema fijo para actualizar alumnos y materias.{% endblock %}
+
+{% block content %}
+  <section class="grid two-col">
+    <article class="card">
+      <h2>Subir archivo CSV</h2>
+      <p class="muted">Schema obligatorio: <code>student_code,full_name,subject_name,period,grade</code></p>
+      <form method="post" action="/admin/grades/upload" enctype="multipart/form-data">
+        <label>Archivo CSV
+          <input name="csv_file" type="file" accept=".csv" required />
+        </label>
+        <div class="actions">
+          <button type="submit">Importar calificaciones</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card">
+      <h2>Reglas</h2>
+      <ul class="list-clean">
+        <li>Las calificaciones deben estar entre 0 y 10.</li>
+        <li>Se aprueba con 6.0 o más.</li>
+        <li>Si ya existe alumno + materia + periodo, el registro se actualiza.</li>
+        <li>Si la materia no existe, el sistema la crea.</li>
+      </ul>
+    </article>
+  </section>
+
+  {% if import_summary %}
+    <section class="card" style="margin-top:20px;">
+      <h2>Resultado de la importación</h2>
+      <div class="grid cards-4">
+        <article class="metric-card">
+          <div class="metric-label">Filas procesadas</div>
+          <div class="metric-value">{{ import_summary.total_rows }}</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Insertadas</div>
+          <div class="metric-value">{{ import_summary.inserted_rows }}</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Actualizadas</div>
+          <div class="metric-value">{{ import_summary.updated_rows }}</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Con error</div>
+          <div class="metric-value">{{ import_summary.error_rows }}</div>
+        </article>
+      </div>
+      {% if import_summary.errors %}
+        <h3 style="margin-top:18px;">Errores detectados</h3>
+        <ul class="list-clean">
+          {% for row_error in import_summary.errors %}
+            <li>{{ row_error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endblock %}

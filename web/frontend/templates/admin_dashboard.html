@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · {{ school_name }}{% endblock %}
+{% block heading %}Dashboard del administrador{% endblock %}
+{% block subtitle %}Resumen general del sistema.{% endblock %}
+
+{% block content %}
+  <section class="grid cards-4">
+    <article class="card metric-card">
+      <div class="metric-label">Total de alumnos</div>
+      <div class="metric-value">{{ total_students }}</div>
+      <div class="metric-meta">Registros activos</div>
+    </article>
+    <article class="card metric-card">
+      <div class="metric-label">Promedio general</div>
+      <div class="metric-value">{{ school_average if school_average is not none else "--" }}</div>
+      <div class="metric-meta">Escala mexicana 0-10</div>
+    </article>
+    <article class="card metric-card">
+      <div class="metric-label">Perfiles incompletos</div>
+      <div class="metric-value">{{ incomplete_profiles }}</div>
+      <div class="metric-meta">Alumnos con datos faltantes</div>
+    </article>
+    <article class="card metric-card">
+      <div class="metric-label">Alumnos en riesgo</div>
+      <div class="metric-value">{{ at_risk_students }}</div>
+      <div class="metric-meta">Seguimiento recomendado</div>
+    </article>
+  </section>
+
+  <section class="grid two-col" style="margin-top:20px;">
+    <article class="card">
+      <h2>Accesos rapidos</h2>
+      <div class="actions">
+        <a class="btn" href="/admin/students/new">Crear alumno</a>
+        <a class="btn secondary" href="/admin/students">Ver alumnos</a>
+        <a class="btn secondary" href="/admin/grades/upload">Importar calificaciones</a>
+        <a class="btn secondary" href="/admin/subjects">Materias</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Seguimiento reciente</h2>
+      {% if recent_predictions %}
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Promedio estimado</th>
+                <th>Probabilidad</th>
+                <th>Riesgo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in recent_predictions %}
+                <tr>
+                  <td><a href="/admin/students/{{ row.student_id }}">{{ row.full_name }}</a></td>
+                  <td>{{ row.estimated_average_10 }}/10</td>
+                  <td>{{ row.good_performance_probability|percent_display }}</td>
+                  <td>{{ row.risk_level }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">Todavia no hay resultados disponibles.</div>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="card" style="margin-top:20px;">
+    <h2>Alumnos recientes</h2>
+    {% if students %}
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Nombre</th>
+              <th>Grupo</th>
+              <th>Promedio</th>
+              <th>Cuenta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+              <tr>
+                <td>{{ student.student_code }}</td>
+                <td><a href="/admin/students/{{ student.id }}">{{ student.full_name }}</a></td>
+                <td>{{ student.group_name or "-" }}</td>
+                <td>{{ student.school_average if student.school_average is not none else "-" }}</td>
+                <td>{{ student.account_email or "Sin cuenta" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty">Aun no hay alumnos registrados.</div>
+    {% endif %}
+  </section>
+{% endblock %}

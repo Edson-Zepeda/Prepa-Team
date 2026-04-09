@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo alumno · {{ school_name }}{% endblock %}
+{% block heading %}Crear alumno{% endblock %}
+{% block subtitle %}Registra un alumno y, si quieres, crea su cuenta de acceso.{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <form method="post" action="/admin/students/new">
+      <div class="form-grid">
+        <label>Código del alumno
+          <input name="student_code" required value="{{ student.student_code if student else '' }}" />
+        </label>
+        <label>Nombre completo
+          <input name="full_name" required value="{{ student.full_name if student else '' }}" />
+        </label>
+        <label>Grupo
+          <input name="group_name" value="{{ student.group_name if student else '' }}" />
+        </label>
+        <label>Periodo actual
+          <input name="current_period" value="{{ student.current_period if student else '' }}" />
+        </label>
+      </div>
+
+      <h3>Cuenta del alumno</h3>
+      <div class="form-grid">
+        <label>Correo de acceso
+          <input name="account_email" type="email" placeholder="opcional" />
+        </label>
+        <label>Contraseña temporal
+          <input name="account_password" type="password" placeholder="opcional" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Guardar alumno</button>
+        <a class="btn secondary" href="/admin/students">Cancelar</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

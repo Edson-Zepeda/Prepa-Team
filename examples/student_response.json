@@ -1,48 +1,33 @@
 {
   "ok": true,
-  "estimated_gpa": 2.2474,
+  "estimated_average_10": 5.62,
   "good_performance_probability": 0.1502,
-  "good_performance_threshold": 2.5,
-  "risk_level": "riesgo alto",
+  "good_performance_threshold_10": 6.0,
+  "risk_level": "riesgo muy alto",
   "messages": [
-    "Prioriza reducir ausencias: es el factor con mayor impacto en el modelo.",
-    "Aumenta tus horas de estudio semanal de forma sostenida.",
-    "Activa tutoring para reforzar las areas donde tengas mas dificultad.",
-    "Busca mayor seguimiento familiar o de un tutor academico.",
-    "Estos resultados son simulaciones del modelo, no una garantia de calificacion."
+    "Reducir ausencias puede subir tu promedio estimado y bajar tu riesgo académico.",
+    "Aumentar tus horas de estudio semanal mejora tu probabilidad de buen rendimiento.",
+    "Activar tutoring puede ayudarte a reforzar las materias con mayor dificultad.",
+    "Tener más seguimiento familiar o académico mejora la consistencia de tu desempeño.",
+    "Tu promedio estimado actual es 5.6/10 y tu probabilidad actual de mantener un buen rendimiento es 15%.",
+    "Estos resultados son simulaciones del modelo y deben usarse como apoyo académico, no como garantía de calificación."
   ],
   "recommended_plan": {
     "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
-    "estimated_gpa_after": 4.0,
+    "estimated_average_after_10": 10.0,
     "probability_after": 1.0,
-    "delta_gpa": 1.7526,
+    "delta_average_10": 4.38,
     "delta_probability": 0.8498,
     "effort": 27
   },
   "top_plans": [
     {
       "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
-      "estimated_gpa_after": 4.0,
+      "estimated_average_after_10": 10.0,
       "probability_after": 1.0,
-      "delta_gpa": 1.7526,
+      "delta_average_10": 4.38,
       "delta_probability": 0.8498,
       "effort": 27
-    },
-    {
-      "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Music",
-      "estimated_gpa_after": 4.0,
-      "probability_after": 1.0,
-      "delta_gpa": 1.7526,
-      "delta_probability": 0.8498,
-      "effort": 27
-    },
-    {
-      "plan": "reducir ausencias en 10 + aumentar estudio en 8h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
-      "estimated_gpa_after": 4.0,
-      "probability_after": 1.0,
-      "delta_gpa": 1.7526,
-      "delta_probability": 0.8498,
-      "effort": 23
     }
   ],
   "excluded_from_advice": [

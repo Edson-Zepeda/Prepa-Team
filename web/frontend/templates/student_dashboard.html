@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Mi dashboard · {{ school_name }}{% endblock %}
+{% block heading %}Mi dashboard{% endblock %}
+{% block subtitle %}Consulta tu promedio escolar y tus recomendaciones.{% endblock %}
+
+{% block content %}
+  <section class="grid cards-3">
+    <article class="card metric-card">
+      <div class="metric-label">Promedio escolar</div>
+      <div class="metric-value">{{ school_average if school_average is not none else "--" }}</div>
+      <div class="metric-meta">Escala real 0-10</div>
+    </article>
+    <article class="card metric-card">
+      <div class="metric-label">Probabilidad de buen rendimiento</div>
+      <div class="metric-value">{{ prediction.good_performance_probability|percent_display if prediction else "--" }}</div>
+      <div class="metric-meta">Meta sugerida: {{ prediction.good_performance_threshold_10 if prediction else "6.0" }}</div>
+    </article>
+    <article class="card metric-card">
+      <div class="metric-label">Riesgo academico</div>
+      <div class="metric-value">{{ prediction.risk_level if prediction else "--" }}</div>
+      <div class="metric-meta">{{ approved_count }} materias aprobadas / {{ failed_count }} pendientes</div>
+    </article>
+  </section>
+
+  <section class="grid two-col" style="margin-top:20px;">
+    <article class="card">
+      <h2>Mis calificaciones</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Periodo</th>
+              <th>Calificacion</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in grades %}
+              <tr>
+                <td>{{ row.subject_name }}</td>
+                <td>{{ row.period }}</td>
+                <td>{{ row.grade }}</td>
+                <td>{{ "Aprobada" if row.status == "approved" else "Reprobada" }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4">Todavia no hay calificaciones cargadas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Resumen</h2>
+      {% if prediction %}
+        <div class="stack">
+          <div class="bar-block">
+            <div class="metric-label">Actual vs plan recomendado</div>
+            <div class="bar-track"><div class="bar-fill" style="width: {{ ((prediction.estimated_average_10 * 10)|round(0))|int }}%"></div></div>
+            <div class="small muted">Actual: {{ prediction.estimated_average_10 }}/10</div>
+            <div class="bar-track"><div class="bar-fill" style="width: {{ ((prediction.recommended_plan.estimated_average_after_10 * 10)|round(0))|int }}%"></div></div>
+            <div class="small muted">Con plan: {{ prediction.recommended_plan.estimated_average_after_10 }}/10</div>
+          </div>
+          <div>
+            <h3>Plan recomendado</h3>
+            <p>{{ prediction.recommended_plan.plan }}</p>
+            <p class="muted">
+              Subida estimada: +{{ prediction.recommended_plan.delta_average_10 }} puntos.
+              {% if prediction.recommended_plan.delta_probability > 0.001 %}
+                Cambio en probabilidad: +{{ (prediction.recommended_plan.delta_probability * 100)|round(1) }} puntos porcentuales.
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <h3>Mensajes</h3>
+            <ul class="list-clean">
+              {% for message in prediction.messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">
+          Completa <a href="/student/profile">tu perfil</a> para ver recomendaciones.
+        </div>
+      {% endif %}
+    </article>
+  </section>
+
+  {% if prediction and prediction.top_plans %}
+    <section class="card" style="margin-top:20px;">
+      <h2>Planes alternativos</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Promedio estimado</th>
+              <th>Probabilidad</th>
+              <th>Esfuerzo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in prediction.top_plans %}
+              <tr>
+                <td>{{ row.plan }}</td>
+                <td>{{ row.estimated_average_after_10 }}/10</td>
+                <td>{{ row.probability_after|percent_display }}</td>
+                <td>{{ row.effort }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

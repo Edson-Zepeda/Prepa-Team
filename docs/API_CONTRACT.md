@@ -1,4 +1,4 @@
-# Contrato API para beta web
+# Contrato API del sistema escolar
 
 Base local recomendada:
 
@@ -6,29 +6,24 @@ Base local recomendada:
 http://127.0.0.1:8000
 ```
 
-## Health check
+## Rutas generales
 
 ```http
 GET /health
-```
-
-Respuesta:
-
-```json
-{
-  "status": "ok"
-}
-```
-
-## Schema
-
-```http
 GET /schema
+POST /predict
+POST /api/auth/login
+POST /api/auth/logout
+GET /api/student/me
+PUT /api/student/profile
+POST /api/student/predict
+GET /api/admin/students/{id}/predict
+POST /api/admin/students
+POST /api/admin/grades/manual
+POST /api/admin/grades/import
 ```
 
-Devuelve campos requeridos, limites permitidos y variables excluidas de recomendaciones.
-
-## Prediccion
+## Predicción pública
 
 ```http
 POST /predict
@@ -52,40 +47,27 @@ Request:
 }
 ```
 
-Response exitosa:
+Response:
 
 ```json
 {
   "ok": true,
-  "estimated_gpa": 2.2474,
-  "good_performance_probability": 0.1502,
-  "good_performance_threshold": 2.5,
-  "risk_level": "riesgo alto",
+  "estimated_average_10": 5.62,
+  "good_performance_probability": 0.73,
+  "good_performance_threshold_10": 6.0,
+  "risk_level": "riesgo moderado",
   "messages": [
-    "Prioriza reducir ausencias: es el factor con mayor impacto en el modelo.",
-    "Aumenta tus horas de estudio semanal de forma sostenida.",
-    "Activa tutoring para reforzar las areas donde tengas mas dificultad.",
-    "Busca mayor seguimiento familiar o de un tutor academico.",
-    "Estos resultados son simulaciones del modelo, no una garantia de calificacion."
+    "Reducir ausencias puede subir tu promedio estimado y bajar tu riesgo académico."
   ],
   "recommended_plan": {
-    "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
-    "estimated_gpa_after": 4.0,
-    "probability_after": 1.0,
-    "delta_gpa": 1.7526,
-    "delta_probability": 0.8498,
-    "effort": 27
+    "plan": "reducir ausencias en 10 + aumentar estudio en 5h/semana + activar tutoring",
+    "estimated_average_after_10": 7.1,
+    "probability_after": 0.88,
+    "delta_average_10": 1.48,
+    "delta_probability": 0.15,
+    "effort": 17
   },
-  "top_plans": [
-    {
-      "plan": "reducir ausencias en 10 + aumentar estudio hasta 20h/semana + activar tutoring + aumentar apoyo parental en 2 + activar Extracurricular",
-      "estimated_gpa_after": 4.0,
-      "probability_after": 1.0,
-      "delta_gpa": 1.7526,
-      "delta_probability": 0.8498,
-      "effort": 27
-    }
-  ],
+  "top_plans": [],
   "excluded_from_advice": [
     "StudentID",
     "GradeClass",
@@ -95,23 +77,88 @@ Response exitosa:
 }
 ```
 
-Response con error de validacion:
+## Login
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+```
+
+Request:
 
 ```json
 {
-  "ok": false,
-  "errors": [
-    {
-      "field": "Absences",
-      "message": "Debe estar entre 0 y 30."
-    }
-  ]
+  "email": "admin@prepateam.local",
+  "password": "Admin1234!"
 }
 ```
 
-## Campos permitidos
+Response:
 
-La UI solo debe enviar:
+```json
+{
+  "ok": true,
+  "role": "admin",
+  "redirect_to": "/admin/dashboard"
+}
+```
+
+## Perfil del alumno
+
+```http
+PUT /api/student/profile
+Content-Type: application/json
+```
+
+Usa exactamente los mismos campos del request de predicción.
+
+## Predicción del alumno autenticado
+
+```http
+POST /api/student/predict
+```
+
+La API toma el perfil guardado del alumno autenticado y devuelve el mismo shape de respuesta que `/predict`.
+
+## Carga manual de calificación
+
+```http
+POST /api/admin/grades/manual
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "student_id": 1,
+  "subject_name": "Matemáticas",
+  "period": "2026-1",
+  "grade": 8.7
+}
+```
+
+Reglas:
+
+- `grade` debe estar entre `0` y `10`
+- el estatus se deriva automáticamente:
+  - `approved` si `grade >= 6.0`
+  - `failed` si `grade < 6.0`
+
+## Importación CSV
+
+```http
+POST /api/admin/grades/import
+Content-Type: multipart/form-data
+```
+
+Schema fijo:
+
+```text
+student_code,full_name,subject_name,period,grade
+```
+
+## Campos permitidos para recomendaciones
 
 ```text
 Age
@@ -126,26 +173,11 @@ Music
 Volunteering
 ```
 
-La UI no debe pedir ni enviar:
+No deben enviarse:
 
 ```text
 StudentID
 GradeClass
 Gender
 Ethnicity
-```
-
-## Rangos
-
-```text
-Age: 10 a 25
-StudyTimeWeekly: 0 a 20
-Absences: 0 a 30
-ParentalEducation: 0 a 4
-Tutoring: 0 o 1
-ParentalSupport: 0 a 4
-Extracurricular: 0 o 1
-Sports: 0 o 1
-Music: 0 o 1
-Volunteering: 0 o 1
 ```

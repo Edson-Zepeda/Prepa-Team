@@ -2,7 +2,9 @@
   "dataset_rows": 2392,
   "dataset_columns": 15,
   "target": "GPA",
-  "good_performance_threshold": 2.5,
+  "good_performance_threshold": 2.4,
+  "good_performance_threshold_10": 6.0,
+  "mexican_scale_factor": 2.5,
   "advice_features": [
     "Age",
     "StudyTimeWeekly",
@@ -72,7 +74,7 @@
     {
       "model": "random_forest",
       "train_mae": 0.07306520483311008,
-      "train_rmse": 0.09119776004376588,
+      "train_rmse": 0.09119776004376587,
       "train_r2": 0.9900939689065318,
       "test_mae": 0.1963675205982804,
       "test_rmse": 0.2529338368548725,
@@ -85,13 +87,13 @@
   "classifier_metrics": [
     {
       "model": "logistic_regression_calibrated",
-      "test_roc_auc": 0.9870745729992866,
-      "test_avg_precision": 0.9704262383067161,
-      "test_accuracy": 0.9478079331941545,
-      "test_precision": 0.9142857142857143,
-      "test_recall": 0.9078014184397163,
-      "test_f1": 0.9110320284697508,
-      "test_brier": 0.041186474476501304
+      "test_roc_auc": 0.9912568738378763,
+      "test_avg_precision": 0.9840747773242127,
+      "test_accuracy": 0.9394572025052192,
+      "test_precision": 0.8950617283950617,
+      "test_recall": 0.9235668789808917,
+      "test_f1": 0.9090909090909091,
+      "test_brier": 0.03843630889411008
     }
   ],
   "top_features": [

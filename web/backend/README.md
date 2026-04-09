@@ -1,6 +1,6 @@
-# Backend beta
+# Backend del sistema escolar
 
-Backend reducido para que la web pueda pedir predicciones y recomendaciones.
+Backend FastAPI para login, roles, control escolar y recomendaciones.
 
 ## Instalar
 
@@ -10,7 +10,7 @@ Desde la raiz del repo:
 pip install -r requirements.txt
 ```
 
-## Generar modelo
+## Preparar modelo
 
 ```bash
 python scripts/build_model_artifacts.py
@@ -23,7 +23,11 @@ models/student_success_artifacts.joblib
 models/student_success_metadata.json
 ```
 
-Si no existen, la API intenta generarlos automaticamente al primer request.
+## Inicializar base de datos y admin
+
+```bash
+python scripts/bootstrap_school_system.py
+```
 
 ## Ejecutar API
 
@@ -36,7 +40,7 @@ python scripts/smoke_test_web_beta.py
 Servidor local:
 
 ```bash
-uvicorn web.backend.app:app --reload
+python -m uvicorn web.backend.app:app --reload
 ```
 
 Endpoints:
@@ -45,12 +49,9 @@ Endpoints:
 GET  /health
 GET  /schema
 POST /predict
-```
-
-## Ejemplo
-
-```bash
-curl -X POST http://127.0.0.1:8000/predict ^
-  -H "Content-Type: application/json" ^
-  -d @examples/student_payload.json
+POST /api/auth/login
+POST /api/auth/logout
+POST /api/student/predict
+GET  /api/student/me
+GET  /api/admin/students/{id}/predict
 ```

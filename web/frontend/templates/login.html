@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login · {{ school_name }}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='app.css') }}" />
+  </head>
+  <body>
+    <section class="hero-login">
+      <div class="login-shell">
+        <article class="login-panel">
+          <div class="eyebrow">Demo de presentacion</div>
+          <h1 class="hero-title">{{ school_name }}</h1>
+          <p class="hero-copy">
+            Consulta calificaciones, administra alumnos y muestra recomendaciones dentro de un flujo escolar simple.
+          </p>
+        </article>
+
+        <article class="login-panel">
+          <h2>Iniciar sesion</h2>
+          <p class="muted">Accede con tu cuenta.</p>
+          {% if error %}
+            <div class="flash error">{{ error }}</div>
+          {% endif %}
+          <form method="post" action="/login">
+            <label>Correo
+              <input name="email" type="email" required placeholder="correo@prepateam.mx" />
+            </label>
+            <label>Contrasena
+              <input name="password" type="password" required placeholder="Ingresa tu contrasena" />
+            </label>
+            <button type="submit">Entrar</button>
+          </form>
+        </article>
+      </div>
+    </section>
+  </body>
+</html>

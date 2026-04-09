@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ school_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='app.css') }}" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-title">{{ school_name }}</div>
+        </div>
+        <nav class="nav">
+          {% if current_user and current_user.role == "admin" %}
+            <a href="/admin/dashboard" class="{% if request.url.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="/admin/students" class="{% if request.url.path.startswith('/admin/students') %}active{% endif %}">Alumnos</a>
+            <a href="/admin/subjects" class="{% if request.url.path.startswith('/admin/subjects') %}active{% endif %}">Materias</a>
+            <a href="/admin/grades/upload" class="{% if request.url.path.startswith('/admin/grades/upload') %}active{% endif %}">Importar CSV</a>
+          {% elif current_user %}
+            <a href="/student/dashboard" class="{% if request.url.path == '/student/dashboard' %}active{% endif %}">Mi dashboard</a>
+            <a href="/student/profile" class="{% if request.url.path == '/student/profile' %}active{% endif %}">Mi perfil</a>
+          {% endif %}
+          <a href="/logout">Cerrar sesion</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="topbar">
+          <div>
+            <h1>{% block heading %}{{ school_name }}{% endblock %}</h1>
+            <p>{% block subtitle %}{% endblock %}</p>
+          </div>
+          {% if current_user %}
+            <div class="user-chip">{{ current_user.email }} · {{ current_user.role|role_label }}</div>
+          {% endif %}
+        </div>
+
+        {% if message %}
+          <div class="flash success">{{ message }}</div>
+        {% endif %}
+        {% if error %}
+          <div class="flash error">{{ error }}</div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,22 +1,32 @@
-# Frontend beta
+# Frontend del sistema escolar
 
-La tarea del frontend es hacer una interfaz simple para estudiantes y conectar con el endpoint:
-
-```text
-POST http://127.0.0.1:8000/predict
-```
-
-Ya existe un archivo inicial:
+La interfaz ya no es un HTML suelto. Ahora se sirve desde FastAPI con plantillas en:
 
 ```text
-web/frontend/index.html
+web/frontend/templates/
+web/frontend/static/
 ```
 
-Puede abrirse directo en el navegador. Si el equipo decide usar React, Vite o Next, este HTML sirve como referencia de campos y respuesta.
+Pantallas principales:
 
-## Campos del formulario
+- `login.html`
+- `admin_dashboard.html`
+- `admin_students.html`
+- `admin_student_detail.html`
+- `admin_subjects.html`
+- `admin_grades_upload.html`
+- `student_dashboard.html`
+- `student_profile.html`
 
-Mostrar solo estos campos:
+La app muestra al alumno:
+
+- promedio escolar real `0–10`
+- promedio estimado `0–10`
+- probabilidad de buen rendimiento
+- nivel de riesgo
+- mensajes y plan recomendado
+
+Variables usadas para recomendaciones:
 
 ```text
 Age
@@ -31,52 +41,11 @@ Music
 Volunteering
 ```
 
-No mostrar:
+Variables que no deben mostrarse ni pedirse:
 
 ```text
 StudentID
 GradeClass
 Gender
 Ethnicity
-```
-
-## Ejemplo de llamada
-
-```js
-const response = await fetch("http://127.0.0.1:8000/predict", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    Age: 17,
-    StudyTimeWeekly: 8,
-    Absences: 10,
-    ParentalEducation: 2,
-    Tutoring: 0,
-    ParentalSupport: 2,
-    Extracurricular: 0,
-    Sports: 1,
-    Music: 0,
-    Volunteering: 0
-  })
-});
-
-const result = await response.json();
-```
-
-## Que mostrar en pantalla
-
-Mostrar:
-
-- `estimated_gpa`
-- `good_performance_probability`
-- `risk_level`
-- `messages`
-- `recommended_plan.plan`
-- `recommended_plan.estimated_gpa_after`
-- `recommended_plan.probability_after`
-
-## Texto etico visible
-
-```text
-Esta herramienta es un simulador academico. No garantiza calificaciones ni sustituye la orientacion de un tutor o docente.
 ```
