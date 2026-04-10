@@ -2,6 +2,16 @@
 
 Repositorio del proyecto y del sistema de control escolar demo.
 
+## Enfoque del producto
+
+Prepa-Team no se presenta como un predictor general de exito academico. Su salida principal es un sistema de **priorizacion e intervencion escolar personalizada**:
+
+- estima el estado actual del alumno en escala mexicana 0-10
+- calcula la probabilidad de mantener un buen rendimiento
+- detecta los factores accionables que mas empujan el riesgo
+- propone el cambio minimo para subir de nivel
+- compara planes de minimo esfuerzo, balanceado y mayor impacto
+
 ## Estructura
 
 ```text
@@ -76,4 +86,4 @@ Para compilar en Overleaf:
 
 ## Nota etica
 
-Las recomendaciones son simulaciones del modelo. No se usan `StudentID`, `GradeClass`, `Gender` ni `Ethnicity` para sugerir acciones y la herramienta no debe presentarse como garantía de calificación.
+Las recomendaciones son simulaciones del modelo. No se usan `StudentID`, `GradeClass`, `Gender` ni `Ethnicity` para sugerir acciones y la herramienta no debe presentarse como garantia de calificacion ni como sustituto de un tutor o directivo.

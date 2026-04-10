@@ -2,7 +2,7 @@
 
 Todo lo complejo ya esta listo en el repo: entrenamiento, artefactos del modelo, reglas de recomendacion, API base y un HTML inicial. El trabajo del equipo es solo cerrar una beta funcional con frontend y backend reducido.
 
-La beta debe presentarse como simulador de apoyo academico. No debe prometer ni garantizar calificaciones.
+La beta debe presentarse como herramienta de priorizacion e intervencion escolar. No debe prometer ni garantizar calificaciones.
 
 ## Ramas
 
@@ -36,7 +36,8 @@ docs/API_CONTRACT.md
 Lo que si debe hacer:
 
 - mejorar formulario y vista de resultados
-- mostrar `estimated_gpa`, `good_performance_probability`, `risk_level`, `messages` y `recommended_plan`
+- mostrar `estimated_average_10`, `good_performance_probability`, `risk_level`, `priority_factors`, `next_level_plan`, `recommended_plan` y `top_plans`
+- presentar acciones concretas con magnitud, no consejos genericos
 - manejar carga y errores de la API
 - dejar la vista usable en laptop y celular
 
@@ -111,6 +112,6 @@ git push -u origin feature/alan-model-api
 
 - el formulario captura datos sin variables sensibles
 - la API responde con JSON estable
-- la UI muestra GPA, probabilidad, riesgo y mensajes
+- la UI muestra promedio estimado, probabilidad, factores prioritarios y planes de intervencion
 - hay minimo dos casos demo probados de punta a punta
 - el merge final entra a `dev/web-beta` y luego a `main`

@@ -11,5 +11,5 @@ if __name__ == "__main__":
     metadata = save_artifacts()
     print("Model artifacts generated in models/")
     print("Best regression model:", metadata["best_regression_model"])
-    print("Good-performance threshold:", metadata["good_performance_threshold"])
     print("Good-performance threshold 0-10:", metadata["good_performance_threshold_10"])
+    print("Recommendation focus: intervention plans with minimum change.")

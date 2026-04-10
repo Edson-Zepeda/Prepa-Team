@@ -2,7 +2,7 @@
 
 {% block title %}Mi dashboard · {{ school_name }}{% endblock %}
 {% block heading %}Mi dashboard{% endblock %}
-{% block subtitle %}Consulta tu promedio escolar y tus recomendaciones.{% endblock %}
+{% block subtitle %}Consulta tu promedio escolar y tu plan de apoyo prioritario.{% endblock %}
 
 {% block content %}
   <section class="grid cards-3">
@@ -14,10 +14,10 @@
     <article class="card metric-card">
       <div class="metric-label">Probabilidad de buen rendimiento</div>
       <div class="metric-value">{{ prediction.good_performance_probability|percent_display if prediction else "--" }}</div>
-      <div class="metric-meta">Meta sugerida: {{ prediction.good_performance_threshold_10 if prediction else "6.0" }}</div>
+      <div class="metric-meta">Referencia oficial: {{ prediction.good_performance_threshold_10 if prediction else "6.0" }}/10</div>
     </article>
     <article class="card metric-card">
-      <div class="metric-label">Riesgo academico</div>
+      <div class="metric-label">Nivel actual</div>
       <div class="metric-value">{{ prediction.risk_level if prediction else "--" }}</div>
       <div class="metric-meta">{{ approved_count }} materias aprobadas / {{ failed_count }} pendientes</div>
     </article>
@@ -53,67 +53,109 @@
     </article>
 
     <article class="card">
-      <h2>Resumen</h2>
+      <h2>Intervencion priorizada</h2>
       {% if prediction %}
         <div class="stack">
           <div class="bar-block">
-            <div class="metric-label">Actual vs plan recomendado</div>
+            <div class="metric-label">Estado actual vs plan principal</div>
             <div class="bar-track"><div class="bar-fill" style="width: {{ ((prediction.estimated_average_10 * 10)|round(0))|int }}%"></div></div>
             <div class="small muted">Actual: {{ prediction.estimated_average_10 }}/10</div>
             <div class="bar-track"><div class="bar-fill" style="width: {{ ((prediction.recommended_plan.estimated_average_after_10 * 10)|round(0))|int }}%"></div></div>
             <div class="small muted">Con plan: {{ prediction.recommended_plan.estimated_average_after_10 }}/10</div>
           </div>
+
           <div>
-            <h3>Plan recomendado</h3>
-            <p>{{ prediction.recommended_plan.plan }}</p>
-            <p class="muted">
-              Subida estimada: +{{ prediction.recommended_plan.delta_average_10 }} puntos.
-              {% if prediction.recommended_plan.delta_probability > 0.001 %}
-                Cambio en probabilidad: +{{ (prediction.recommended_plan.delta_probability * 100)|round(1) }} puntos porcentuales.
-              {% endif %}
-            </p>
-          </div>
-          <div>
-            <h3>Mensajes</h3>
+            <h3>{{ prediction.recommended_plan.title }}</h3>
+            <p class="muted">Meta: {{ prediction.recommended_plan.target_zone }}</p>
             <ul class="list-clean">
-              {% for message in prediction.messages %}
-                <li>{{ message }}</li>
+              {% for action in prediction.recommended_plan.actions %}
+                <li>{{ action.change_text }}</li>
               {% endfor %}
             </ul>
+            <p class="muted">
+              Impacto esperado: +{{ prediction.recommended_plan.delta_average_10 }} puntos y
+              {% if prediction.recommended_plan.delta_probability > 0.001 %}
+                +{{ (prediction.recommended_plan.delta_probability * 100)|round(1) }} puntos porcentuales.
+              {% else %}
+                sin cambio porcentual relevante.
+              {% endif %}
+            </p>
+            <p class="muted">Esfuerzo estimado: {{ prediction.recommended_plan.effort_label }}</p>
+            <p class="muted">{{ prediction.recommended_plan.why_selected }}</p>
           </div>
+
+          {% if prediction.next_level_plan %}
+            <div class="subcard">
+              <h3>{{ prediction.next_level_plan.title }}</h3>
+              <p class="muted">Objetivo inmediato: {{ prediction.next_level_plan.target_zone }}</p>
+              <ul class="list-clean">
+                {% for action in prediction.next_level_plan.actions %}
+                  <li>{{ action.change_text }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
         </div>
       {% else %}
         <div class="empty">
-          Completa <a href="/student/profile">tu perfil</a> para ver recomendaciones.
+          Completa <a href="/student/profile">tu perfil</a> para ver tu plan de apoyo.
         </div>
       {% endif %}
     </article>
   </section>
 
+  {% if prediction %}
+    <section class="grid two-col" style="margin-top:20px;">
+      <article class="card">
+        <h2>Factores prioritarios</h2>
+        <div class="factor-list">
+          {% for factor in prediction.priority_factors %}
+            <div class="factor-item">
+              <div class="metric-label">{{ factor.label }}</div>
+              <div>{{ factor.change_text }}</div>
+              <div class="small muted">
+                Impacto esperado:
+                {% if factor.delta_probability > 0.001 %}
+                  +{{ (factor.delta_probability * 100)|round(1) }} puntos porcentuales
+                {% else %}
+                  +{{ factor.delta_average_10 }} puntos en promedio estimado
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Mensajes clave</h2>
+        <ul class="list-clean">
+          {% for message in prediction.messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+    </section>
+  {% endif %}
+
   {% if prediction and prediction.top_plans %}
     <section class="card" style="margin-top:20px;">
       <h2>Planes alternativos</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Plan</th>
-              <th>Promedio estimado</th>
-              <th>Probabilidad</th>
-              <th>Esfuerzo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in prediction.top_plans %}
-              <tr>
-                <td>{{ row.plan }}</td>
-                <td>{{ row.estimated_average_after_10 }}/10</td>
-                <td>{{ row.probability_after|percent_display }}</td>
-                <td>{{ row.effort }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="plan-grid">
+        {% for row in prediction.top_plans %}
+          <article class="subcard">
+            <div class="metric-label">{{ row.title }}</div>
+            <div class="small muted">Meta: {{ row.target_zone }} · Esfuerzo: {{ row.effort_label }}</div>
+            <ul class="list-clean">
+              {% for action in row.actions %}
+                <li>{{ action.change_text }}</li>
+              {% endfor %}
+            </ul>
+            <p class="muted">
+              Promedio: {{ row.estimated_average_after_10 }}/10 · Probabilidad: {{ row.probability_after|percent_display }}
+            </p>
+            <p class="muted">{{ row.why_selected }}</p>
+          </article>
+        {% endfor %}
       </div>
     </section>
   {% endif %}

@@ -6,6 +6,10 @@ Base local recomendada:
 http://127.0.0.1:8000
 ```
 
+## Posicionamiento del producto
+
+La API publica expone a Prepa-Team como una **herramienta de priorizacion e intervencion escolar personalizada**. La salida principal no es una frase generica, sino planes concretos para mover al alumno a una zona aceptable con el menor cambio posible.
+
 ## Rutas generales
 
 ```http
@@ -23,7 +27,20 @@ POST /api/admin/grades/manual
 POST /api/admin/grades/import
 ```
 
-## Predicción pública
+## Esquema publico
+
+```http
+GET /schema
+```
+
+Campos clave esperados:
+
+- `good_performance_threshold_10 = 6.0`
+- `acceptable_zone = "medio"`
+- `risk_bands`
+- `plan_strategies = ["minimo_esfuerzo", "balanceado", "mayor_impacto"]`
+
+## Prediccion publica
 
 ```http
 POST /predict
@@ -55,19 +72,77 @@ Response:
   "estimated_average_10": 5.62,
   "good_performance_probability": 0.73,
   "good_performance_threshold_10": 6.0,
-  "risk_level": "riesgo moderado",
-  "messages": [
-    "Reducir ausencias puede subir tu promedio estimado y bajar tu riesgo académico."
+  "risk_level": "alto",
+  "priority_factors": [
+    {
+      "field": "Absences",
+      "label": "ausencias",
+      "change_text": "Reducir ausencias de 10 a 5",
+      "delta_probability": 0.18,
+      "delta_average_10": 0.42
+    }
   ],
-  "recommended_plan": {
-    "plan": "reducir ausencias en 10 + aumentar estudio en 5h/semana + activar tutoring",
-    "estimated_average_after_10": 7.1,
-    "probability_after": 0.88,
-    "delta_average_10": 1.48,
-    "delta_probability": 0.15,
-    "effort": 17
+  "next_level_plan": {
+    "strategy": "siguiente_nivel",
+    "title": "Cambio minimo al siguiente nivel",
+    "target_zone": "medio",
+    "plan": "Reducir ausencias de 10 a 5 + Aumentar horas de estudio de 8 h a 10 h por semana",
+    "actions": [
+      {
+        "field": "Absences",
+        "label": "ausencias",
+        "from": 10,
+        "to": 5,
+        "change_text": "Reducir ausencias de 10 a 5"
+      }
+    ],
+    "estimated_average_after_10": 6.3,
+    "probability_after": 0.56,
+    "delta_average_10": 0.68,
+    "delta_probability": 0.19,
+    "effort_score": 7,
+    "effort_label": "medio",
+    "why_selected": "Se eligio porque permite subir de nivel con el menor ajuste posible."
   },
-  "top_plans": [],
+  "recommended_plan": {
+    "strategy": "minimo_esfuerzo",
+    "title": "Plan principal para llegar a zona aceptable",
+    "target_zone": "medio",
+    "plan": "Reducir ausencias de 10 a 5 + Aumentar horas de estudio de 8 h a 10 h por semana",
+    "actions": [
+      {
+        "field": "Absences",
+        "label": "ausencias",
+        "from": 10,
+        "to": 5,
+        "change_text": "Reducir ausencias de 10 a 5"
+      }
+    ],
+    "estimated_average_after_10": 6.3,
+    "probability_after": 0.56,
+    "delta_average_10": 0.68,
+    "delta_probability": 0.19,
+    "effort_score": 7,
+    "effort_label": "medio",
+    "why_selected": "Se eligio porque alcanza la zona medio con el menor esfuerzo total."
+  },
+  "top_plans": [
+    {
+      "strategy": "minimo_esfuerzo",
+      "title": "Plan de minimo esfuerzo"
+    },
+    {
+      "strategy": "balanceado",
+      "title": "Plan balanceado"
+    },
+    {
+      "strategy": "mayor_impacto",
+      "title": "Plan de mayor impacto"
+    }
+  ],
+  "messages": [
+    "Estado actual: promedio estimado 5.6/10, probabilidad de buen rendimiento 73% y nivel alto."
+  ],
   "excluded_from_advice": [
     "StudentID",
     "GradeClass",
@@ -76,6 +151,17 @@ Response:
   ]
 }
 ```
+
+## Reglas de negocio del plan
+
+- `recommended_plan`
+  - si el alumno esta en `alto` o `muy alto`, intenta llegar a `medio` o mejor
+  - si el alumno esta en `medio`, intenta llegar a `bajo`
+  - si ya esta en `bajo`, prioriza mantenimiento o mejora ligera
+- `next_level_plan`
+  - busca el menor cambio para subir solo un nivel
+- `top_plans`
+  - devuelve exactamente 3 estrategias: `minimo_esfuerzo`, `balanceado`, `mayor_impacto`
 
 ## Login
 
@@ -110,9 +196,9 @@ PUT /api/student/profile
 Content-Type: application/json
 ```
 
-Usa exactamente los mismos campos del request de predicción.
+Usa exactamente los mismos campos del request de prediccion.
 
-## Predicción del alumno autenticado
+## Prediccion del alumno autenticado
 
 ```http
 POST /api/student/predict
@@ -120,7 +206,7 @@ POST /api/student/predict
 
 La API toma el perfil guardado del alumno autenticado y devuelve el mismo shape de respuesta que `/predict`.
 
-## Carga manual de calificación
+## Carga manual de calificacion
 
 ```http
 POST /api/admin/grades/manual
@@ -132,7 +218,7 @@ Request:
 ```json
 {
   "student_id": 1,
-  "subject_name": "Matemáticas",
+  "subject_name": "Matematicas",
   "period": "2026-1",
   "grade": 8.7
 }
@@ -141,11 +227,11 @@ Request:
 Reglas:
 
 - `grade` debe estar entre `0` y `10`
-- el estatus se deriva automáticamente:
+- el estatus se deriva automaticamente:
   - `approved` si `grade >= 6.0`
   - `failed` si `grade < 6.0`
 
-## Importación CSV
+## Importacion CSV
 
 ```http
 POST /api/admin/grades/import

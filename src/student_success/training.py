@@ -265,52 +265,32 @@ def train_advice_models(df: pd.DataFrame) -> tuple[CalibratedClassifierCV, Pipel
         stratify=y_good,
     )
 
-    classifier_records = []
+    base_classifier = LogisticRegression(max_iter=5000, class_weight="balanced")
+    base_pipeline = build_model_pipeline(base_classifier, ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES)
+    base_pipeline.fit(x_train, y_train)
+    base_probabilities = base_pipeline.predict_proba(x_test)[:, 1]
+    base_predictions = (base_probabilities >= 0.5).astype(int)
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
-    candidates = classifier_candidates()
-    for model_name, model in candidates.items():
-        pipeline = build_model_pipeline(model, ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES)
-        pipeline.fit(x_train, y_train)
-        probabilities = pipeline.predict_proba(x_test)[:, 1]
-        predictions = (probabilities >= 0.5).astype(int)
-        cv_scores = cross_validate(
-            pipeline,
-            x_advice,
-            y_good,
-            cv=cv,
-            scoring={
-                "roc_auc": "roc_auc",
-                "average_precision": "average_precision",
-                "f1": "f1",
-                "accuracy": "accuracy",
-            },
-            n_jobs=-1,
-        )
-        classifier_records.append(
-            {
-                "model": model_name,
-                "test_roc_auc": roc_auc_score(y_test, probabilities),
-                "test_avg_precision": average_precision_score(y_test, probabilities),
-                "test_accuracy": accuracy_score(y_test, predictions),
-                "test_precision": precision_score(y_test, predictions, zero_division=0),
-                "test_recall": recall_score(y_test, predictions, zero_division=0),
-                "test_f1": f1_score(y_test, predictions, zero_division=0),
-                "test_brier": brier_score_loss(y_test, probabilities),
-                "cv_roc_auc": cv_scores["test_roc_auc"].mean(),
-                "cv_avg_precision": cv_scores["test_average_precision"].mean(),
-                "cv_f1": cv_scores["test_f1"].mean(),
-                "cv_accuracy": cv_scores["test_accuracy"].mean(),
-            }
-        )
-
-    metrics = pd.DataFrame(classifier_records).sort_values(
-        ["cv_roc_auc", "test_brier"],
-        ascending=[False, True],
-    ).reset_index(drop=True)
-    best_name = metrics.loc[0, "model"]
+    cv_scores = cross_validate(
+        base_pipeline,
+        x_advice,
+        y_good,
+        cv=cv,
+        scoring={
+            "roc_auc": "roc_auc",
+            "average_precision": "average_precision",
+            "f1": "f1",
+            "accuracy": "accuracy",
+        },
+        n_jobs=-1,
+    )
 
     classifier = CalibratedClassifierCV(
-        estimator=build_model_pipeline(candidates[best_name], ADVICE_NUMERIC_FEATURES, ADVICE_CATEGORICAL_FEATURES),
+        estimator=build_model_pipeline(
+            LogisticRegression(max_iter=5000, class_weight="balanced"),
+            ADVICE_NUMERIC_FEATURES,
+            ADVICE_CATEGORICAL_FEATURES,
+        ),
         method="sigmoid",
         cv=5,
     )
@@ -324,7 +304,7 @@ def train_advice_models(df: pd.DataFrame) -> tuple[CalibratedClassifierCV, Pipel
     calibrated = pd.DataFrame(
         [
             {
-                "model": f"{best_name}_calibrated",
+                "model": "logistic_regression_calibrated",
                 "test_roc_auc": roc_auc_score(y_test, probabilities),
                 "test_avg_precision": average_precision_score(y_test, probabilities),
                 "test_accuracy": accuracy_score(y_test, predictions),
@@ -332,6 +312,14 @@ def train_advice_models(df: pd.DataFrame) -> tuple[CalibratedClassifierCV, Pipel
                 "test_recall": recall_score(y_test, predictions, zero_division=0),
                 "test_f1": f1_score(y_test, predictions, zero_division=0),
                 "test_brier": brier_score_loss(y_test, probabilities),
+                "cv_roc_auc": cv_scores["test_roc_auc"].mean(),
+                "cv_avg_precision": cv_scores["test_average_precision"].mean(),
+                "cv_f1": cv_scores["test_f1"].mean(),
+                "cv_accuracy": cv_scores["test_accuracy"].mean(),
+                "base_test_roc_auc": roc_auc_score(y_test, base_probabilities),
+                "base_test_avg_precision": average_precision_score(y_test, base_probabilities),
+                "base_test_accuracy": accuracy_score(y_test, base_predictions),
+                "base_test_f1": f1_score(y_test, base_predictions, zero_division=0),
             }
         ]
     )
@@ -364,9 +352,10 @@ def build_artifacts(data_path: Path = DATA_PATH) -> dict[str, object]:
         "dataset_rows": int(df.shape[0]),
         "dataset_columns": int(df.shape[1]),
         "target": TARGET,
-        "good_performance_threshold": GOOD_PERFORMANCE_THRESHOLD,
+        "good_performance_threshold_gpa_equivalent": GOOD_PERFORMANCE_THRESHOLD,
         "good_performance_threshold_10": GOOD_PERFORMANCE_THRESHOLD_10,
         "mexican_scale_factor": MEXICAN_SCALE_FACTOR,
+        "acceptable_zone": "medio",
         "advice_features": ADVICE_FEATURES,
         "actionable_features": ACTIONABLE_FEATURES,
         "excluded_from_advice": EXCLUDED_FROM_ADVICE,

@@ -106,6 +106,13 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
 }
 
+.subcard {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 12px;
+  padding: 16px;
+}
+
 .metric-card { display: grid; gap: 10px; }
 .metric-label { color: var(--text-secondary); font-size: 0.92rem; }
 .metric-value { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; }
@@ -208,6 +215,14 @@ th { color: var(--text-secondary); font-size: 0.86rem; text-transform: uppercase
 
 .hero-copy { color: var(--text-secondary); max-width: 52ch; }
 .stack { display: grid; gap: 16px; }
+.plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.factor-list { display: grid; gap: 12px; }
+.factor-item {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.04);
+}
 .small { font-size: 0.9rem; }
 .muted { color: var(--text-secondary); }
 
@@ -234,7 +249,7 @@ th { color: var(--text-secondary); font-size: 0.86rem; text-transform: uppercase
 .bar-fill { height: 100%; background: var(--accent); }
 
 @media (max-width: 1080px) {
-  .grid.cards-4, .grid.cards-3, .grid.two-col, .login-shell { grid-template-columns: 1fr; }
+  .grid.cards-4, .grid.cards-3, .grid.two-col, .login-shell, .plan-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 780px) {

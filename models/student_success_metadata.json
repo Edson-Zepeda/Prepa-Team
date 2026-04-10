@@ -2,9 +2,10 @@
   "dataset_rows": 2392,
   "dataset_columns": 15,
   "target": "GPA",
-  "good_performance_threshold": 2.4,
+  "good_performance_threshold_gpa_equivalent": 2.4,
   "good_performance_threshold_10": 6.0,
   "mexican_scale_factor": 2.5,
+  "acceptable_zone": "medio",
   "advice_features": [
     "Age",
     "StudyTimeWeekly",
@@ -93,7 +94,15 @@
       "test_precision": 0.8950617283950617,
       "test_recall": 0.9235668789808917,
       "test_f1": 0.9090909090909091,
-      "test_brier": 0.03843630889411008
+      "test_brier": 0.03843630889411008,
+      "cv_roc_auc": 0.9882009268766245,
+      "cv_avg_precision": 0.9775569078341346,
+      "cv_f1": 0.9065600829043188,
+      "cv_accuracy": 0.9356207580297167,
+      "base_test_roc_auc": 0.9913557779799818,
+      "base_test_avg_precision": 0.984267565271642,
+      "base_test_accuracy": 0.9290187891440501,
+      "base_test_f1": 0.8975903614457831
     }
   ],
   "top_features": [
