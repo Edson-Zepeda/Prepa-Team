@@ -86,40 +86,52 @@
           <label>Ausencias
             <input name="absences" type="number" min="0" max="30" required value="{{ profile.absences or 0 }}" />
           </label>
-          <label>Educación parental
-            <input name="parental_education" type="number" min="0" max="4" required value="{{ profile.parental_education or 0 }}" />
+          <label>Escolaridad familiar
+            <select name="parental_education">
+              <option value="0" {% if profile.parental_education == 0 or profile.parental_education is none %}selected{% endif %}>Sin estudios superiores</option>
+              <option value="1" {% if profile.parental_education == 1 %}selected{% endif %}>Secundaria</option>
+              <option value="2" {% if profile.parental_education == 2 %}selected{% endif %}>Preparatoria</option>
+              <option value="3" {% if profile.parental_education == 3 %}selected{% endif %}>Licenciatura</option>
+              <option value="4" {% if profile.parental_education == 4 %}selected{% endif %}>Posgrado</option>
+            </select>
           </label>
           <label>Tutoría
             <select name="tutoring">
               <option value="0" {% if not profile.tutoring %}selected{% endif %}>No</option>
-              <option value="1" {% if profile.tutoring == 1 %}selected{% endif %}>Si</option>
+              <option value="1" {% if profile.tutoring == 1 %}selected{% endif %}>Sí</option>
             </select>
           </label>
-          <label>Apoyo parental
-            <input name="parental_support" type="number" min="0" max="4" required value="{{ profile.parental_support or 0 }}" />
+          <label>Apoyo familiar
+            <select name="parental_support">
+              <option value="0" {% if profile.parental_support == 0 or profile.parental_support is none %}selected{% endif %}>Muy bajo</option>
+              <option value="1" {% if profile.parental_support == 1 %}selected{% endif %}>Bajo</option>
+              <option value="2" {% if profile.parental_support == 2 %}selected{% endif %}>Medio</option>
+              <option value="3" {% if profile.parental_support == 3 %}selected{% endif %}>Alto</option>
+              <option value="4" {% if profile.parental_support == 4 %}selected{% endif %}>Muy alto</option>
+            </select>
           </label>
           <label>Actividad extracurricular
             <select name="extracurricular">
               <option value="0" {% if not profile.extracurricular %}selected{% endif %}>No</option>
-              <option value="1" {% if profile.extracurricular == 1 %}selected{% endif %}>Si</option>
+              <option value="1" {% if profile.extracurricular == 1 %}selected{% endif %}>Sí</option>
             </select>
           </label>
           <label>Deportes
             <select name="sports">
               <option value="0" {% if not profile.sports %}selected{% endif %}>No</option>
-              <option value="1" {% if profile.sports == 1 %}selected{% endif %}>Si</option>
+              <option value="1" {% if profile.sports == 1 %}selected{% endif %}>Sí</option>
             </select>
           </label>
           <label>Música
             <select name="music">
               <option value="0" {% if not profile.music %}selected{% endif %}>No</option>
-              <option value="1" {% if profile.music == 1 %}selected{% endif %}>Si</option>
+              <option value="1" {% if profile.music == 1 %}selected{% endif %}>Sí</option>
             </select>
           </label>
           <label>Voluntariado
             <select name="volunteering">
               <option value="0" {% if not profile.volunteering %}selected{% endif %}>No</option>
-              <option value="1" {% if profile.volunteering == 1 %}selected{% endif %}>Si</option>
+              <option value="1" {% if profile.volunteering == 1 %}selected{% endif %}>Sí</option>
             </select>
           </label>
         </div>

@@ -40,14 +40,30 @@ FIELD_LABELS = {
     "Age": "edad",
     "StudyTimeWeekly": "horas de estudio",
     "Absences": "ausencias",
-    "ParentalEducation": "educación parental",
+    "ParentalEducation": "escolaridad familiar",
     "Tutoring": "tutoría",
-    "ParentalSupport": "apoyo parental",
+    "ParentalSupport": "apoyo familiar",
     "Extracurricular": "actividad extracurricular",
     "Sports": "deportes",
     "Music": "música",
     "Volunteering": "voluntariado",
     "Activities": "actividades",
+}
+
+PARENTAL_EDUCATION_LEVELS = {
+    0: "sin estudios superiores",
+    1: "secundaria",
+    2: "preparatoria",
+    3: "licenciatura",
+    4: "posgrado",
+}
+
+PARENTAL_SUPPORT_LEVELS = {
+    0: "muy bajo",
+    1: "bajo",
+    2: "medio",
+    3: "alto",
+    4: "muy alto",
 }
 
 ACTIVITY_FIELDS = ["Extracurricular", "Sports", "Music", "Volunteering"]
@@ -102,8 +118,12 @@ def _plan_name(parts: list[str]) -> str:
 
 
 def _value_to_display(field: str, value: float | int) -> str | float | int:
+    if field == "ParentalEducation":
+        return PARENTAL_EDUCATION_LEVELS.get(int(value), str(int(value)))
+    if field == "ParentalSupport":
+        return PARENTAL_SUPPORT_LEVELS.get(int(value), str(int(value)))
     if field in {"Tutoring", "Extracurricular", "Sports", "Music", "Volunteering"}:
-        return "Si" if int(value) == 1 else "No"
+        return "Sí" if int(value) == 1 else "No"
     if field == "StudyTimeWeekly":
         if float(value).is_integer():
             return f"{int(value)} h"
@@ -119,7 +139,7 @@ def _change_text(field: str, before: float | int, after: float | int) -> str:
     if field == "Tutoring":
         return "Activar tutoría"
     if field == "ParentalSupport":
-        return f"Subir apoyo parental de {int(before)} a {int(after)}"
+        return f"Reforzar apoyo familiar de {_value_to_display(field, before)} a {_value_to_display(field, after)}"
     if field in ACTIVITY_FIELDS:
         return f"Activar {FIELD_LABELS[field]}"
     return f"Ajustar {FIELD_LABELS[field]} de {_value_to_display(field, before)} a {_value_to_display(field, after)}"
@@ -274,12 +294,12 @@ class StudentSuccessService:
         if int(case["Tutoring"]) == 0:
             tutoring_options.append(("activar tutoría", 2, lambda x: x.__setitem__("Tutoring", 1)))
 
-        support_options = [("mantener apoyo parental", 0, lambda x: None)]
+        support_options = [("mantener apoyo familiar", 0, lambda x: None)]
         for increase in [1, 2]:
             if int(case["ParentalSupport"]) + increase <= 4:
                 support_options.append(
                     (
-                        f"aumentar apoyo parental en {increase}",
+                        f"reforzar apoyo familiar en {increase}",
                         increase,
                         lambda x, h=increase: x.__setitem__(
                             "ParentalSupport", min(4, int(x["ParentalSupport"]) + h)
@@ -375,7 +395,7 @@ class StudentSuccessService:
             ("Absences", "ausencias", "absences"),
             ("StudyTimeWeekly", "horas de estudio", "study"),
             ("Tutoring", "tutoría", "tutoring"),
-            ("ParentalSupport", "apoyo parental", "support"),
+            ("ParentalSupport", "apoyo familiar", "support"),
             ("Activities", "actividades", "activities"),
         ]
         single_scenarios: list[dict[str, Any]] = []

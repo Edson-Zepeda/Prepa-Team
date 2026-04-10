@@ -10,6 +10,11 @@ http://127.0.0.1:8000
 
 La API publica expone a Prepa-Team como una **herramienta de priorizacion e intervencion escolar personalizada**. La salida principal no es una frase generica, sino planes concretos para mover al alumno a una zona aceptable con el menor cambio posible.
 
+Nota sobre variables parentales:
+
+- `ParentalEducation` sigue entrando al modelo como escala ordinal, pero no debe mostrarse como recomendacion directa al alumno.
+- `ParentalSupport` tambien entra como escala ordinal `0-4`, pero en interfaz y mensajes debe traducirse a niveles cualitativos: `muy bajo`, `bajo`, `medio`, `alto`, `muy alto`.
+
 ## Rutas generales
 
 ```http
@@ -84,7 +89,7 @@ Response:
   ],
   "next_level_plan": {
     "strategy": "siguiente_nivel",
-    "title": "Cambio minimo",
+    "title": "Cambio mínimo",
     "target_zone": "medio",
     "plan": "Reducir ausencias de 10 a 5 + Aumentar horas de estudio de 8 h a 10 h por semana",
     "actions": [
@@ -129,7 +134,7 @@ Response:
   "top_plans": [
     {
       "strategy": "minimo_esfuerzo",
-      "title": "Plan de minimo esfuerzo"
+      "title": "Plan de mínimo esfuerzo"
     },
     {
       "strategy": "balanceado",

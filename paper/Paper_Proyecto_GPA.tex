@@ -1,4 +1,4 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[12pt,onecolumn]{IEEEtran}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -9,6 +9,8 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{url}
+
+\newcommand{\figw}{0.96\textwidth}
 
 \title{Predicción y Análisis de Rendimiento Académico mediante Inteligencia Artificial}
 
@@ -70,14 +72,14 @@ Las columnas disponibles son StudentID, Age, Gender, Ethnicity, ParentalEducatio
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_gpa_distribution.png}
+\includegraphics[width=\figw]{figures/fig_gpa_distribution.png}
 \caption{Distribucion del GPA observado y umbral utilizado para definir buen rendimiento.}
 \label{fig:gpa_distribution}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=.78\linewidth]{figures/fig_good_performance_balance.png}
+\includegraphics[width=.92\textwidth]{figures/fig_good_performance_balance.png}
 \caption{Balance de clases para el clasificador de buen rendimiento.}
 \label{fig:class_balance}
 \end{figure}
@@ -114,7 +116,7 @@ Se evaluaron LogisticRegression, RandomForestClassifier, HistGradientBoostingCla
 
 \subsection{Motor de recomendaciones}
 
-El motor de recomendaciones usa solo variables accionables o de contexto no sensible: Age, StudyTimeWeekly, Absences, ParentalEducation, Tutoring, ParentalSupport, Extracurricular, Sports, Music y Volunteering. Se excluyen StudentID, GradeClass, Gender y Ethnicity. Las intervenciones simuladas incluyen reducir ausencias, aumentar horas de estudio, activar tutorias, incrementar apoyo parental y activar una actividad complementaria. Para escenarios intensivos, el motor tambien considera reducir ausencias a un maximo de 5 y aumentar el estudio hasta 20 horas semanales.
+El motor de recomendaciones usa solo variables accionables o de contexto no sensible: Age, StudyTimeWeekly, Absences, ParentalEducation, Tutoring, ParentalSupport, Extracurricular, Sports, Music y Volunteering. Se excluyen StudentID, GradeClass, Gender y Ethnicity. En el producto, ParentalEducation se conserva solo como contexto y no se recomienda de forma directa; ParentalSupport se interpreta como una escala ordinal cualitativa de apoyo familiar, desde muy bajo hasta muy alto. Las intervenciones simuladas incluyen reducir ausencias, aumentar horas de estudio, activar tutorias, reforzar apoyo familiar y activar una actividad complementaria. Para escenarios intensivos, el motor tambien considera reducir ausencias a un maximo de 5 y aumentar el estudio hasta 20 horas semanales.
 
 Para cada plan se calcula GPA actual estimado, GPA posterior estimado, probabilidad actual de buen rendimiento, probabilidad posterior y diferencia esperada. El sistema ordena planes por incremento de probabilidad, incremento de GPA y esfuerzo estimado. Las salidas del regresor de apoyo se acotan al rango valido de GPA [0, 4] para evitar mensajes imposibles en casos extremos.
 
@@ -142,14 +144,14 @@ El modelo LinearRegression obtuvo el mejor desempeno en prueba, con RMSE = 0.196
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_model_comparison.png}
+\includegraphics[width=\figw]{figures/fig_model_comparison.png}
 \caption{Comparacion de RMSE en prueba y validacion cruzada.}
 \label{fig:model_comparison}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_actual_vs_predicted.png}
+\includegraphics[width=\figw]{figures/fig_actual_vs_predicted.png}
 \caption{Valores reales contra predichos para el mejor modelo de regresion.}
 \label{fig:actual_predicted}
 \end{figure}
@@ -174,7 +176,7 @@ Despues de afinar hiperparametros, XGBoost redujo su error de prueba respecto a 
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_xgb_lr_predictions.png}
+\includegraphics[width=\figw]{figures/fig_xgb_lr_predictions.png}
 \caption{Comparacion directa entre predicciones de LinearRegression y XGBoost.}
 \label{fig:xgb_lr}
 \end{figure}
@@ -185,7 +187,7 @@ La importancia por permutacion mostro que Absences es la variable dominante. Su 
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_feature_importance.png}
+\includegraphics[width=\figw]{figures/fig_feature_importance.png}
 \caption{Importancia de variables por permutacion en el conjunto de prueba.}
 \label{fig:feature_importance}
 \end{figure}
@@ -210,7 +212,7 @@ Al remover Absences, todos los modelos perdieron capacidad predictiva. En Linear
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_ablation_absences.png}
+\includegraphics[width=\figw]{figures/fig_ablation_absences.png}
 \caption{Efecto de remover Absences sobre el RMSE.}
 \label{fig:ablation}
 \end{figure}
@@ -234,14 +236,14 @@ El clasificador calibrado obtuvo ROC AUC = 0.9871, Average Precision = 0.9704, A
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_confusion_matrix.png}
+\includegraphics[width=.9\textwidth]{figures/fig_confusion_matrix.png}
 \caption{Matriz de confusion del clasificador calibrado.}
 \label{fig:confusion}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_roc_pr_curves.png}
+\includegraphics[width=\figw]{figures/fig_roc_pr_curves.png}
 \caption{Curvas ROC y precision-recall del clasificador calibrado.}
 \label{fig:roc_pr}
 \end{figure}
@@ -252,7 +254,7 @@ En un caso de riesgo moderado-alto, el sistema recomendo un plan intensivo: redu
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_recommendation_plan.png}
+\includegraphics[width=\figw]{figures/fig_recommendation_plan.png}
 \caption{Comparacion entre escenario actual y plan recomendado.}
 \label{fig:recommendation}
 \end{figure}
@@ -263,7 +265,7 @@ Aunque Gender y Ethnicity no se usan para recomendar acciones, se calcularon met
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_fairness_audit.png}
+\includegraphics[width=\figw]{figures/fig_fairness_audit.png}
 \caption{Auditoria exploratoria por subgrupos sensibles.}
 \label{fig:fairness}
 \end{figure}

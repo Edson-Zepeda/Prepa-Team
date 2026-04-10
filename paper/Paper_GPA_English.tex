@@ -1,4 +1,4 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[12pt,onecolumn]{IEEEtran}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -9,6 +9,8 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{url}
+
+\newcommand{\figw}{0.96\textwidth}
 
 \title{Prediction and Analysis of Academic Performance Using Artificial Intelligence}
 
@@ -70,14 +72,14 @@ The available columns are StudentID, Age, Gender, Ethnicity, ParentalEducation, 
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_gpa_distribution.png}
+\includegraphics[width=\figw]{figures/fig_gpa_distribution.png}
 \caption{Distribution of observed GPA and the threshold used to define good performance.}
 \label{fig:gpa_distribution}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=.78\linewidth]{figures/fig_good_performance_balance.png}
+\includegraphics[width=.92\textwidth]{figures/fig_good_performance_balance.png}
 \caption{Class balance for the good-performance classifier.}
 \label{fig:class_balance}
 \end{figure}
@@ -114,7 +116,7 @@ LogisticRegression, RandomForestClassifier, HistGradientBoostingClassifier, and 
 
 \subsection{Recommendation Engine}
 
-The recommendation engine uses only actionable or non-sensitive contextual variables: Age, StudyTimeWeekly, Absences, ParentalEducation, Tutoring, ParentalSupport, Extracurricular, Sports, Music, and Volunteering. StudentID, GradeClass, Gender, and Ethnicity are excluded. The simulated interventions include reducing absences, increasing study hours, enabling tutoring, increasing parental support, and enabling a complementary activity. For intensive scenarios, the engine also considers reducing absences to a maximum of 5 and increasing study time up to 20 weekly hours.
+The recommendation engine uses only actionable or non-sensitive contextual variables: Age, StudyTimeWeekly, Absences, ParentalEducation, Tutoring, ParentalSupport, Extracurricular, Sports, Music, and Volunteering. StudentID, GradeClass, Gender, and Ethnicity are excluded. In the product layer, ParentalEducation is retained only as contextual information and is not recommended directly; ParentalSupport is interpreted as an ordinal qualitative scale of family support, from very low to very high. The simulated interventions include reducing absences, increasing study hours, enabling tutoring, strengthening family support, and enabling a complementary activity. For intensive scenarios, the engine also considers reducing absences to a maximum of 5 and increasing study time up to 20 weekly hours.
 
 For each plan, the system computes the current estimated GPA, post-intervention estimated GPA, current probability of good performance, post-intervention probability, and expected difference. Plans are ranked by probability increase, GPA increase, and estimated effort. Outputs from the support regressor are clipped to the valid GPA range [0, 4] to avoid impossible messages in extreme cases.
 
@@ -142,14 +144,14 @@ LinearRegression obtained the best test performance, with RMSE = 0.1963 and $R^2
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_model_comparison.png}
+\includegraphics[width=\figw]{figures/fig_model_comparison.png}
 \caption{Comparison of test and cross-validation RMSE.}
 \label{fig:model_comparison}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_actual_vs_predicted.png}
+\includegraphics[width=\figw]{figures/fig_actual_vs_predicted.png}
 \caption{Actual versus predicted values for the best regression model.}
 \label{fig:actual_predicted}
 \end{figure}
@@ -174,7 +176,7 @@ After hyperparameter tuning, XGBoost reduced its test error compared with the in
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_xgb_lr_predictions.png}
+\includegraphics[width=\figw]{figures/fig_xgb_lr_predictions.png}
 \caption{Direct comparison between LinearRegression and XGBoost predictions.}
 \label{fig:xgb_lr}
 \end{figure}
@@ -185,7 +187,7 @@ Permutation importance showed that Absences is the dominant variable. Its mean i
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_feature_importance.png}
+\includegraphics[width=\figw]{figures/fig_feature_importance.png}
 \caption{Permutation feature importance on the test set.}
 \label{fig:feature_importance}
 \end{figure}
@@ -210,7 +212,7 @@ When Absences was removed, all models lost predictive capacity. In LinearRegress
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_ablation_absences.png}
+\includegraphics[width=\figw]{figures/fig_ablation_absences.png}
 \caption{Effect of removing Absences on RMSE.}
 \label{fig:ablation}
 \end{figure}
@@ -234,14 +236,14 @@ The calibrated classifier obtained ROC AUC = 0.9871, Average Precision = 0.9704,
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_confusion_matrix.png}
+\includegraphics[width=.9\textwidth]{figures/fig_confusion_matrix.png}
 \caption{Confusion matrix of the calibrated classifier.}
 \label{fig:confusion}
 \end{figure}
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_roc_pr_curves.png}
+\includegraphics[width=\figw]{figures/fig_roc_pr_curves.png}
 \caption{ROC and precision-recall curves of the calibrated classifier.}
 \label{fig:roc_pr}
 \end{figure}
@@ -252,7 +254,7 @@ For a moderate-to-high risk case, the system recommended an intensive plan: redu
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_recommendation_plan.png}
+\includegraphics[width=\figw]{figures/fig_recommendation_plan.png}
 \caption{Comparison between current scenario and recommended plan.}
 \label{fig:recommendation}
 \end{figure}
@@ -263,7 +265,7 @@ Although Gender and Ethnicity are not used to recommend actions, group-level met
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_fairness_audit.png}
+\includegraphics[width=\figw]{figures/fig_fairness_audit.png}
 \caption{Exploratory audit by sensitive subgroups.}
 \label{fig:fairness}
 \end{figure}
