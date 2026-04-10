@@ -84,7 +84,7 @@ Response:
   ],
   "next_level_plan": {
     "strategy": "siguiente_nivel",
-    "title": "Cambio minimo al siguiente nivel",
+    "title": "Cambio minimo",
     "target_zone": "medio",
     "plan": "Reducir ausencias de 10 a 5 + Aumentar horas de estudio de 8 h a 10 h por semana",
     "actions": [
@@ -106,7 +106,7 @@ Response:
   },
   "recommended_plan": {
     "strategy": "minimo_esfuerzo",
-    "title": "Plan principal para llegar a zona aceptable",
+    "title": "Plan principal",
     "target_zone": "medio",
     "plan": "Reducir ausencias de 10 a 5 + Aumentar horas de estudio de 8 h a 10 h por semana",
     "actions": [

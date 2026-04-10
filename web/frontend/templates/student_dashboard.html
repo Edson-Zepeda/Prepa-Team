@@ -2,7 +2,7 @@
 
 {% block title %}Mi dashboard · {{ school_name }}{% endblock %}
 {% block heading %}Mi dashboard{% endblock %}
-{% block subtitle %}Consulta tu promedio escolar y tu plan de apoyo prioritario.{% endblock %}
+{% block subtitle %}Promedio, estado y plan.{% endblock %}
 
 {% block content %}
   <section class="grid cards-3">
@@ -32,7 +32,7 @@
             <tr>
               <th>Materia</th>
               <th>Periodo</th>
-              <th>Calificacion</th>
+              <th>Calificación</th>
               <th>Estatus</th>
             </tr>
           </thead>
@@ -45,7 +45,7 @@
                 <td>{{ "Aprobada" if row.status == "approved" else "Reprobada" }}</td>
               </tr>
             {% else %}
-              <tr><td colspan="4">Todavia no hay calificaciones cargadas.</td></tr>
+              <tr><td colspan="4">Todavía no hay calificaciones cargadas.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -53,7 +53,7 @@
     </article>
 
     <article class="card">
-      <h2>Intervencion priorizada</h2>
+      <h2>Intervención</h2>
       {% if prediction %}
         <div class="stack">
           <div class="bar-block">
@@ -98,7 +98,7 @@
         </div>
       {% else %}
         <div class="empty">
-          Completa <a href="/student/profile">tu perfil</a> para ver tu plan de apoyo.
+          Completa <a href="/student/profile">tu perfil</a> para ver tu plan.
         </div>
       {% endif %}
     </article>

@@ -152,7 +152,7 @@ def main() -> None:
 
             student_dashboard = client.get("/student/dashboard")
             assert student_dashboard.status_code == 200, student_dashboard.text
-            assert "Intervencion priorizada" in student_dashboard.text, student_dashboard.text
+            assert "Intervención" in student_dashboard.text, student_dashboard.text
 
             me = client.get("/api/student/me")
             assert me.status_code == 200, me.text
@@ -169,7 +169,7 @@ def main() -> None:
             assert admin_login_again.status_code == 200, admin_login_again.text
             admin_student_view = client.get(f"/admin/students/{student_id}")
             assert admin_student_view.status_code == 200, admin_student_view.text
-            assert "Plan de intervencion" in admin_student_view.text, admin_student_view.text
+            assert "Intervención" in admin_student_view.text, admin_student_view.text
 
         print("School web smoke test passed.")
         print(json.dumps(student_body, indent=2, ensure_ascii=False))

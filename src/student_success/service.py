@@ -40,12 +40,12 @@ FIELD_LABELS = {
     "Age": "edad",
     "StudyTimeWeekly": "horas de estudio",
     "Absences": "ausencias",
-    "ParentalEducation": "educacion parental",
-    "Tutoring": "tutoria",
+    "ParentalEducation": "educación parental",
+    "Tutoring": "tutoría",
     "ParentalSupport": "apoyo parental",
     "Extracurricular": "actividad extracurricular",
     "Sports": "deportes",
-    "Music": "musica",
+    "Music": "música",
     "Volunteering": "voluntariado",
     "Activities": "actividades",
 }
@@ -117,7 +117,7 @@ def _change_text(field: str, before: float | int, after: float | int) -> str:
     if field == "StudyTimeWeekly":
         return f"Aumentar horas de estudio de {_value_to_display(field, before)} a {_value_to_display(field, after)} por semana"
     if field == "Tutoring":
-        return "Activar tutoria"
+        return "Activar tutoría"
     if field == "ParentalSupport":
         return f"Subir apoyo parental de {int(before)} a {int(after)}"
     if field in ACTIVITY_FIELDS:
@@ -135,14 +135,14 @@ def _maintenance_plan(
         "title": title,
         "target_zone": "bajo",
         "risk_level_after": "bajo",
-        "plan": "Mantener habitos actuales",
+        "plan": "Mantener hábitos actuales",
         "actions": [
             {
                 "field": "maintenance",
                 "label": "mantenimiento",
                 "from": "-",
                 "to": "-",
-                "change_text": "Mantener asistencia, estudio constante y seguimiento academico.",
+                "change_text": "Mantener asistencia, estudio constante y seguimiento académico.",
             }
         ],
         "estimated_average_after_10": round(estimated_average_10, 2),
@@ -151,7 +151,7 @@ def _maintenance_plan(
         "delta_probability": 0.0,
         "effort_score": 0,
         "effort_label": "bajo",
-        "why_selected": "No se detecto una mejora material con cambios pequenos, por lo que la prioridad es sostener los habitos actuales.",
+        "why_selected": "No se detectó una mejora material con cambios pequeños, por lo que la prioridad es sostener los hábitos actuales.",
     }
 
 
@@ -270,9 +270,9 @@ class StudentSuccessService:
                 )
             )
 
-        tutoring_options = [("mantener tutoria", 0, lambda x: None)]
+        tutoring_options = [("mantener tutoría", 0, lambda x: None)]
         if int(case["Tutoring"]) == 0:
-            tutoring_options.append(("activar tutoria", 2, lambda x: x.__setitem__("Tutoring", 1)))
+            tutoring_options.append(("activar tutoría", 2, lambda x: x.__setitem__("Tutoring", 1)))
 
         support_options = [("mantener apoyo parental", 0, lambda x: None)]
         for increase in [1, 2]:
@@ -374,7 +374,7 @@ class StudentSuccessService:
         factor_map = [
             ("Absences", "ausencias", "absences"),
             ("StudyTimeWeekly", "horas de estudio", "study"),
-            ("Tutoring", "tutoria", "tutoring"),
+            ("Tutoring", "tutoría", "tutoring"),
             ("ParentalSupport", "apoyo parental", "support"),
             ("Activities", "actividades", "activities"),
         ]
@@ -466,12 +466,12 @@ class StudentSuccessService:
     def _why_selected(self, strategy: str, priority_factors: list[dict[str, Any]], target_zone: str) -> str:
         factor_text = ", ".join(factor["label"] for factor in priority_factors[:2]) or "ausencias y horas de estudio"
         if strategy == "minimo_esfuerzo":
-            return f"Se eligio porque alcanza la zona {target_zone} con el menor esfuerzo total. En este caso, {factor_text} son los factores mas influyentes."
+            return f"Se eligió porque alcanza la zona {target_zone} con el menor esfuerzo total. En este caso, {factor_text} son los factores más influyentes."
         if strategy == "balanceado":
-            return f"Se eligio porque ofrece la mejor relacion entre impacto esperado y esfuerzo. En este caso, {factor_text} son los factores mas influyentes."
+            return f"Se eligió porque ofrece la mejor relación entre impacto esperado y esfuerzo. En este caso, {factor_text} son los factores más influyentes."
         if strategy == "mayor_impacto":
-            return f"Se eligio porque produce la mayor mejora esperada. En este caso, {factor_text} son los factores mas influyentes."
-        return f"Se eligio porque permite subir de nivel con el menor ajuste posible. En este caso, {factor_text} son los factores mas influyentes."
+            return f"Se eligió porque produce la mayor mejora esperada. En este caso, {factor_text} son los factores más influyentes."
+        return f"Se eligió porque permite subir de nivel con el menor ajuste posible. En este caso, {factor_text} son los factores más influyentes."
 
     def _format_plan(
         self,
@@ -484,7 +484,7 @@ class StudentSuccessService:
         priority_factors: list[dict[str, Any]],
     ) -> dict[str, Any]:
         actions = self._build_actions(current_case, row)
-        plan_text = " + ".join(action["change_text"] for action in actions) if actions else "Mantener habitos actuales"
+        plan_text = " + ".join(action["change_text"] for action in actions) if actions else "Mantener hábitos actuales"
         target_zone = str(row["risk_level_after"])
         return {
             "strategy": strategy,
@@ -523,13 +523,13 @@ class StudentSuccessService:
         else:
             if next_level_plan:
                 messages.append(
-                    f"Plan minimo para subir de nivel: {next_level_plan['plan']}. Lleva a {next_level_plan['target_zone']} con esfuerzo {next_level_plan['effort_label']}."
+                    f"Plan mínimo para subir de nivel: {next_level_plan['plan']}. Lleva a {next_level_plan['target_zone']} con esfuerzo {next_level_plan['effort_label']}."
                 )
             messages.append(
                 f"Plan principal para llegar a zona aceptable: {recommended_plan['plan']}. Impacto esperado: +{recommended_plan['delta_average_10']:.2f} puntos y +{recommended_plan['delta_probability'] * 100:.1f} puntos porcentuales."
             )
-        messages.append("Planes alternativos: revisa minimo esfuerzo, balanceado y mayor impacto segun tus recursos.")
-        messages.append(f"Por que se eligio este plan: {recommended_plan['why_selected']}")
+        messages.append("Planes alternativos: revisa mínimo esfuerzo, balanceado y mayor impacto según tus recursos.")
+        messages.append(f"Por qué se eligió este plan: {recommended_plan['why_selected']}")
         messages.append(
             "Las recomendaciones son simulaciones del modelo y sirven como apoyo para priorizar intervenciones escolares."
         )
@@ -601,7 +601,7 @@ class StudentSuccessService:
                 self._format_plan(
                     next_level_row,
                     "siguiente_nivel",
-                    "Cambio minimo al siguiente nivel",
+                    "Cambio mínimo",
                     case_series,
                     estimated_average_10,
                     probability,
@@ -643,7 +643,7 @@ class StudentSuccessService:
             }
 
         recommended_title = (
-            "Plan de mantenimiento" if current_level == "bajo" else "Plan principal para llegar a zona aceptable"
+            "Plan de mantenimiento" if current_level == "bajo" else "Plan principal"
         )
         recommended_plan = self._format_plan(
             recommended_row,
@@ -657,7 +657,7 @@ class StudentSuccessService:
 
         top_plans = []
         for strategy, title in [
-            ("minimo_esfuerzo", "Plan de minimo esfuerzo"),
+            ("minimo_esfuerzo", "Plan de mínimo esfuerzo"),
             ("balanceado", "Plan balanceado"),
             ("mayor_impacto", "Plan de mayor impacto"),
         ]:

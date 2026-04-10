@@ -13,17 +13,17 @@
 \title{Predicción y Análisis de Rendimiento Académico mediante Inteligencia Artificial}
 
 \author{
-\IEEEauthorblockN{Edson Manuel Zepeda Chavez}
+\IEEEauthorblockN{Edson Manuel Zepeda Chávez}
 \IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
 \textit{Universidad de Colima, Bachillerato 16}\\
 rmcedson09@gmail.com}
 \and
-\IEEEauthorblockN{Francisco Ricardo Moreno Sanchez}
+\IEEEauthorblockN{Francisco Ricardo Moreno Sánchez}
 \IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
 \textit{CONALEP Plantel 262}\\
 fmorenosanchez39@gmail.com}
 \and
-\IEEEauthorblockN{Alan Emir Martinez Espinosa}
+\IEEEauthorblockN{Alan Emir Martínez Espinosa}
 \IEEEauthorblockA{\textit{Samsung Innovation Campus 2025--2026}\\
 \textit{CONALEP Plantel 262}\\
 maresesp012@gmail.com}
@@ -41,20 +41,20 @@ maresesp012@gmail.com}
 \projectlogos
 
 \begin{abstract}
-Este articulo presenta un sistema de inteligencia artificial, basado en aprendizaje automatico, para predecir y analizar el rendimiento academico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervencion temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con informacion de edad, tiempo semanal de estudio, ausencias, tutorias, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresion para estimar GPA y una tarea de clasificacion calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresion fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. Tras afinar XGBoost, su RMSE de prueba se redujo a 0.2028 y sus predicciones se mantuvieron muy cercanas a las del modelo lineal, con correlacion de 0.9979, pero aun asi no lo supero en generalizacion. La prueba de ablacion sin la variable Absences incremento el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implemento un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor practico del sistema no reside solo en predecir, sino en convertir la prediccion en apoyo supervisado para estudiantes y tutores.
+Este artículo presenta un sistema de inteligencia artificial, basado en aprendizaje automático, para predecir y analizar el rendimiento académico de estudiantes y transformar la salida del modelo en recomendaciones accionables de intervención temprana. El estudio utiliza un conjunto de datos tabular de 2,392 estudiantes y 15 variables, con información de edad, tiempo semanal de estudio, ausencias, tutorías, apoyo parental, actividades extracurriculares y GPA. El enfoque combina dos tareas complementarias: una tarea de regresión para estimar GPA y una tarea de clasificación calibrada para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Se compararon LinearRegression, Random Forest, SVR y XGBoost. El mejor modelo de regresión fue LinearRegression, con RMSE = 0.1963 y $R^2$ = 0.9534 en prueba. Tras afinar XGBoost, su RMSE de prueba se redujo a 0.2028 y sus predicciones se mantuvieron muy cercanas a las del modelo lineal, con correlación de 0.9979, pero aún así no lo superó en generalización. La prueba de ablación sin la variable Absences incrementó el RMSE del modelo lineal de 0.1963 a 0.8692, confirmando que las ausencias son el factor dominante. Finalmente, se implementó un motor de recomendaciones que simula intervenciones, excluye variables sensibles o no accionables y prioriza acciones con mayor impacto estimado en GPA y probabilidad de buen rendimiento. Los resultados sugieren que el valor práctico del sistema no reside solo en predecir, sino en convertir la predicción en apoyo supervisado para estudiantes y tutores.
 \end{abstract}
 
 \begin{IEEEkeywords}
-rendimiento academico, GPA, aprendizaje automatico, Educational Data Mining, XGBoost, recomendaciones academicas, alerta temprana, interpretabilidad.
+rendimiento académico, GPA, aprendizaje automático, Educational Data Mining, XGBoost, recomendaciones académicas, alerta temprana, interpretabilidad.
 \end{IEEEkeywords}
 
-\section{Introduccion}
+\section{Introducción}
 
-La prediccion temprana del rendimiento academico es una aplicacion relevante de Educational Data Mining porque permite identificar estudiantes con riesgo y orientar recursos de apoyo antes de que el bajo desempeno se consolide. La literatura reciente muestra que los modelos de aprendizaje automatico pueden ser utiles para anticipar resultados academicos y apoyar decisiones educativas \cite{khairy2024prediction}. Sin embargo, un sistema que solo entrega una etiqueta o un puntaje tiene utilidad limitada: para una escuela, un tutor o un estudiante, la pregunta central no es solamente ``cual sera el GPA'', sino ``que se puede mejorar para elevar la probabilidad de buen rendimiento''.
+La predicción temprana del rendimiento académico es una aplicación relevante de Educational Data Mining porque permite identificar estudiantes con riesgo y orientar recursos de apoyo antes de que el bajo desempeño se consolide. La literatura reciente muestra que los modelos de aprendizaje automático pueden ser útiles para anticipar resultados académicos y apoyar decisiones educativas \cite{khairy2024prediction}. Sin embargo, un sistema que solo entrega una etiqueta o un puntaje tiene utilidad limitada: para una escuela, un tutor o un estudiante, la pregunta central no es solamente ``cuál será el GPA'', sino ``qué se puede mejorar para elevar la probabilidad de buen rendimiento''.
 
-Este trabajo responde a ese problema mediante un flujo reproducible que combina prediccion, interpretacion y recomendacion. Primero, se entrena un conjunto de modelos de regresion para estimar el GPA. Segundo, se analiza por que XGBoost no supera al modelo lineal aunque sus predicciones se comporten de manera muy parecida. Tercero, se realiza una prueba de ablacion quitando Absences para medir la dependencia del modelo respecto a esa variable. Cuarto, se entrena un clasificador calibrado para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Quinto, se construye un motor de recomendaciones que prueba escenarios de intervencion sobre variables accionables.
+Este trabajo responde a ese problema mediante un flujo reproducible que combina predicción, interpretación y recomendación. Primero, se entrena un conjunto de modelos de regresión para estimar el GPA. Segundo, se analiza por qué XGBoost no supera al modelo lineal aunque sus predicciones se comporten de manera muy parecida. Tercero, se realiza una prueba de ablación quitando Absences para medir la dependencia del modelo respecto a esa variable. Cuarto, se entrena un clasificador calibrado para estimar la probabilidad de alcanzar buen rendimiento, definido como GPA $\geq 2.5$. Quinto, se construye un motor de recomendaciones que prueba escenarios de intervención sobre variables accionables.
 
-La contribucion principal del articulo es proponer una ruta practica para convertir un modelo predictivo de desempeno academico en una herramienta de apoyo. La propuesta evita recomendar sobre variables sensibles o no modificables, como Gender, Ethnicity, StudentID y GradeClass, y se enfoca en variables donde una intervencion educativa podria tener sentido: ausencias, horas de estudio, tutorias, apoyo parental y participacion en actividades. Esta distincion es importante porque los modelos educativos pueden generar riesgos de sesgo o uso indebido si se convierten en decisiones automaticas sin supervision humana \cite{hardt2016equality,barocas2023fairness}.
+La contribución principal del artículo es proponer una ruta práctica para convertir un modelo predictivo de desempeño académico en una herramienta de apoyo. La propuesta evita recomendar sobre variables sensibles o no modificables, como Gender, Ethnicity, StudentID y GradeClass, y se enfoca en variables donde una intervención educativa podría tener sentido: ausencias, horas de estudio, tutorías, apoyo parental y participación en actividades. Esta distinción es importante porque los modelos educativos pueden generar riesgos de sesgo o uso indebido si se convierten en decisiones automáticas sin supervisión humana \cite{hardt2016equality,barocas2023fairness}.
 
 \section{Trabajo relacionado}
 

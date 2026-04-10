@@ -58,7 +58,7 @@ templates.env.filters["risk_badge_class"] = risk_badge_class
 
 app = FastAPI(
     title="Sistema de control escolar",
-    description="Sistema de control escolar con planes de intervencion minima para estudiantes y directivos.",
+    description="Sistema de control escolar con planes de intervención mínima para estudiantes y directivos.",
     version="1.0.0",
 )
 

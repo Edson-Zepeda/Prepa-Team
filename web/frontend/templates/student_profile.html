@@ -19,10 +19,10 @@
         <label>Ausencias
           <input name="absences" type="number" min="0" max="30" required value="{{ profile.absences or 0 }}" />
         </label>
-        <label>Educacion parental
+        <label>Educación parental
           <input name="parental_education" type="number" min="0" max="4" required value="{{ profile.parental_education or 0 }}" />
         </label>
-        <label>Tutoria
+        <label>Tutoría
           <select name="tutoring">
             <option value="0" {% if not profile.tutoring %}selected{% endif %}>No</option>
             <option value="1" {% if profile.tutoring == 1 %}selected{% endif %}>Si</option>
@@ -43,7 +43,7 @@
             <option value="1" {% if profile.sports == 1 %}selected{% endif %}>Si</option>
           </select>
         </label>
-        <label>Musica
+        <label>Música
           <select name="music">
             <option value="0" {% if not profile.music %}selected{% endif %}>No</option>
             <option value="1" {% if profile.music == 1 %}selected{% endif %}>Si</option>

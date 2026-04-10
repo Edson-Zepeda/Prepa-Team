@@ -2,12 +2,12 @@
 
 {% block title %}{{ student.full_name }} · {{ school_name }}{% endblock %}
 {% block heading %}{{ student.full_name }}{% endblock %}
-{% block subtitle %}Vista completa del alumno.{% endblock %}
+{% block subtitle %}Resumen y seguimiento.{% endblock %}
 
 {% block content %}
   <section class="grid cards-4">
     <article class="card metric-card">
-      <div class="metric-label">Codigo</div>
+      <div class="metric-label">Código</div>
       <div class="metric-value">{{ student.student_code }}</div>
       <div class="metric-meta">{{ student.group_name or "Sin grupo" }}</div>
     </article>
@@ -30,10 +30,10 @@
 
   <section class="grid two-col" style="margin-top:20px;">
     <article class="card">
-      <h2>Datos del alumno</h2>
+      <h2>Alumno</h2>
       <form method="post" action="/admin/students/{{ student.id }}/update">
         <div class="form-grid">
-          <label>Codigo
+          <label>Código
             <input name="student_code" required value="{{ student.student_code }}" />
           </label>
           <label>Nombre completo
@@ -63,7 +63,7 @@
           <label>Correo
             <input name="account_email" type="email" required value="{{ account.email if account else '' }}" />
           </label>
-          <label>Contrasena
+          <label>Contraseña
             <input name="account_password" type="password" required />
           </label>
         </div>
@@ -86,10 +86,10 @@
           <label>Ausencias
             <input name="absences" type="number" min="0" max="30" required value="{{ profile.absences or 0 }}" />
           </label>
-          <label>Educacion parental
+          <label>Educación parental
             <input name="parental_education" type="number" min="0" max="4" required value="{{ profile.parental_education or 0 }}" />
           </label>
-          <label>Tutoria
+          <label>Tutoría
             <select name="tutoring">
               <option value="0" {% if not profile.tutoring %}selected{% endif %}>No</option>
               <option value="1" {% if profile.tutoring == 1 %}selected{% endif %}>Si</option>
@@ -110,7 +110,7 @@
               <option value="1" {% if profile.sports == 1 %}selected{% endif %}>Si</option>
             </select>
           </label>
-          <label>Musica
+          <label>Música
             <select name="music">
               <option value="0" {% if not profile.music %}selected{% endif %}>No</option>
               <option value="1" {% if profile.music == 1 %}selected{% endif %}>Si</option>
@@ -139,7 +139,7 @@
             <tr>
               <th>Materia</th>
               <th>Periodo</th>
-              <th>Calificacion</th>
+              <th>Calificación</th>
               <th>Estatus</th>
               <th>Origen</th>
             </tr>
@@ -176,7 +176,7 @@
           <label>Periodo
             <input name="period" required value="{{ student.current_period or '' }}" />
           </label>
-          <label>Calificacion
+          <label>Calificación
             <input name="grade" type="number" step="0.1" min="0" max="10" required />
           </label>
         </div>
@@ -187,7 +187,7 @@
     </article>
 
     <article class="card">
-      <h2>Plan de intervencion</h2>
+      <h2>Intervención</h2>
       {% if prediction %}
         <div class="stack">
           <div>
