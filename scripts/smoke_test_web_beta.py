@@ -154,6 +154,10 @@ def main() -> None:
             assert student_dashboard.status_code == 200, student_dashboard.text
             assert "Intervención" in student_dashboard.text, student_dashboard.text
 
+            student_report = client.get("/student/report")
+            assert student_report.status_code == 200, student_report.text
+            assert "Reporte escolar" in student_report.text, student_report.text
+
             me = client.get("/api/student/me")
             assert me.status_code == 200, me.text
             me_body = me.json()
@@ -167,9 +171,18 @@ def main() -> None:
                 json={"email": os.environ["ADMIN_EMAIL"], "password": os.environ["ADMIN_PASSWORD"]},
             )
             assert admin_login_again.status_code == 200, admin_login_again.text
+
+            csv_template = client.get("/admin/grades/template.csv")
+            assert csv_template.status_code == 200, csv_template.text
+            assert "student_code,full_name,subject_name,period,grade" in csv_template.text, csv_template.text
+
             admin_student_view = client.get(f"/admin/students/{student_id}")
             assert admin_student_view.status_code == 200, admin_student_view.text
             assert "Intervención" in admin_student_view.text, admin_student_view.text
+
+            admin_student_report = client.get(f"/admin/students/{student_id}/report")
+            assert admin_student_report.status_code == 200, admin_student_report.text
+            assert "Reporte escolar" in admin_student_report.text, admin_student_report.text
 
         print("School web smoke test passed.")
         print(json.dumps(student_body, indent=2, ensure_ascii=False))

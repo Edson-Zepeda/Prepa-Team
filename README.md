@@ -11,6 +11,8 @@ Prepa-Team no se presenta como un predictor general de exito academico. Su salid
 - detecta los factores accionables que mas empujan el riesgo
 - propone el cambio minimo para subir de nivel
 - compara planes de minimo esfuerzo, balanceado y mayor impacto
+- genera un reporte imprimible por alumno
+- permite descargar una plantilla CSV para importacion masiva
 
 ## Estructura
 
@@ -53,6 +55,14 @@ Abrir en navegador:
 
 ```text
 http://127.0.0.1:8000
+```
+
+Rutas utiles de la demo:
+
+```text
+/student/report
+/admin/students/{id}/report
+/admin/grades/template.csv
 ```
 
 Credenciales demo:

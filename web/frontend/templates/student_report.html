@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reporte del alumno · {{ student.full_name }}</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='app.css') }}" />
+    <style>
+      body { background: #f7f7f7; }
+      .report-shell { max-width: 980px; margin: 0 auto; padding: 24px; }
+      .report-page { background: #fff; border: 1px solid rgba(30,29,28,.12); border-radius: 16px; padding: 28px; }
+      .report-head { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
+      .report-title { margin: 0; font-size: 2rem; }
+      .report-meta { color: rgba(30,29,28,.68); font-size: .95rem; }
+      .report-actions { display: flex; gap: 12px; margin-bottom: 20px; }
+      .report-block { margin-top: 20px; }
+      .report-block h2 { margin-bottom: 10px; }
+      @media print {
+        body { background: #fff; }
+        .report-actions { display: none; }
+        .report-shell { max-width: none; padding: 0; }
+        .report-page { border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="report-shell">
+      <div class="report-actions">
+        <a class="btn secondary" href="{% if current_user and current_user.role == 'admin' %}/admin/students/{{ student.id }}{% else %}/student/dashboard{% endif %}">Volver</a>
+        <button type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+      </div>
+
+      <section class="report-page">
+        <div class="report-head">
+          <div>
+            <p class="eyebrow">Reporte escolar</p>
+            <h1 class="report-title">{{ student.full_name }}</h1>
+            <div class="report-meta">
+              Código {{ student.student_code }} · {{ student.group_name or "Sin grupo" }} · {{ student.current_period or "Sin periodo" }}
+            </div>
+          </div>
+          <div class="report-meta">
+            Generado: {{ generated_at }}<br />
+            {{ school_name }}
+          </div>
+        </div>
+
+        <section class="grid cards-4">
+          <article class="card metric-card">
+            <div class="metric-label">Promedio escolar</div>
+            <div class="metric-value">{{ school_average if school_average is not none else "--" }}</div>
+            <div class="metric-meta">Escala 0-10</div>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-label">Probabilidad</div>
+            <div class="metric-value">{{ prediction.good_performance_probability|percent_display if prediction else "--" }}</div>
+            <div class="metric-meta">Buen rendimiento</div>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-label">Nivel actual</div>
+            <div class="metric-value">{{ prediction.risk_level if prediction else "--" }}</div>
+            <div class="metric-meta">Riesgo académico</div>
+          </article>
+          <article class="card metric-card">
+            <div class="metric-label">Materias</div>
+            <div class="metric-value">{{ approved_count }}</div>
+            <div class="metric-meta">{{ failed_count }} pendientes</div>
+          </article>
+        </section>
+
+        <section class="report-block grid two-col">
+          <article class="card">
+            <h2>Plan principal</h2>
+            {% if prediction %}
+              <p class="muted">Meta: {{ prediction.recommended_plan.target_zone }} · Esfuerzo: {{ prediction.recommended_plan.effort_label }}</p>
+              <ul class="list-clean">
+                {% for action in prediction.recommended_plan.actions %}
+                  <li>{{ action.change_text }}</li>
+                {% endfor %}
+              </ul>
+              <p class="muted">
+                Impacto esperado: +{{ prediction.recommended_plan.delta_average_10 }} puntos y
+                {% if prediction.recommended_plan.delta_probability > 0.001 %}
+                  +{{ (prediction.recommended_plan.delta_probability * 100)|round(1) }} puntos porcentuales.
+                {% else %}
+                  sin cambio porcentual relevante.
+                {% endif %}
+              </p>
+              <p class="muted">{{ prediction.recommended_plan.why_selected }}</p>
+            {% else %}
+              <div class="empty">No hay suficientes datos para generar un plan.</div>
+            {% endif %}
+          </article>
+
+          <article class="card">
+            <h2>Factores prioritarios</h2>
+            {% if prediction %}
+              <div class="factor-list">
+                {% for factor in prediction.priority_factors %}
+                  <div class="factor-item">
+                    <div class="metric-label">{{ factor.label }}</div>
+                    <div>{{ factor.change_text }}</div>
+                    <div class="small muted">
+                      {% if factor.delta_probability > 0.001 %}
+                        +{{ (factor.delta_probability * 100)|round(1) }} puntos porcentuales
+                      {% else %}
+                        +{{ factor.delta_average_10 }} puntos en promedio estimado
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty">No hay factores disponibles.</div>
+            {% endif %}
+          </article>
+        </section>
+
+        <section class="report-block card">
+          <h2>Calificaciones</h2>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Materia</th>
+                  <th>Periodo</th>
+                  <th>Calificación</th>
+                  <th>Estatus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in grades %}
+                  <tr>
+                    <td>{{ row.subject_name }}</td>
+                    <td>{{ row.period }}</td>
+                    <td>{{ row.grade }}</td>
+                    <td>{{ "Aprobada" if row.status == "approved" else "Reprobada" }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4">Sin calificaciones registradas.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </div>
+  </body>
+</html>

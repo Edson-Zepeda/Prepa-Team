@@ -32,6 +32,18 @@ POST /api/admin/grades/manual
 POST /api/admin/grades/import
 ```
 
+## Rutas web utiles
+
+```http
+GET /student/report
+GET /admin/students/{id}/report
+GET /admin/grades/template.csv
+```
+
+- `/student/report`: vista imprimible del alumno autenticado.
+- `/admin/students/{id}/report`: reporte imprimible del alumno para directivos.
+- `/admin/grades/template.csv`: plantilla base para la carga masiva.
+
 ## Esquema publico
 
 ```http

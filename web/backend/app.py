@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 import sys
 from typing import Any
@@ -7,7 +8,7 @@ from urllib.parse import quote
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -181,6 +182,12 @@ def student_dashboard_context(student_id: int) -> dict[str, Any]:
         "failed_count": failed_count,
         "prediction": prediction,
     }
+
+
+def report_context(student_id: int) -> dict[str, Any]:
+    context = student_dashboard_context(student_id)
+    context["generated_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    return context
 
 
 def admin_dashboard_context() -> dict[str, Any]:
@@ -481,6 +488,20 @@ async def admin_grades_upload_submit(request: Request, csv_file: UploadFile = Fi
         return render(request, "admin_grades_upload.html", error=str(exc))
 
 
+@app.get("/admin/grades/template.csv")
+def admin_grades_template(request: Request):
+    require_user(request, "admin")
+    csv_content = "\n".join(
+        [
+            "student_code,full_name,subject_name,period,grade",
+            "PT001,Edson Manuel Zepeda Chavez,Matematicas,2026-A,5.8",
+            "PT002,Francisco Ricardo Moreno Sanchez,Programacion,2026-A,9.8",
+        ]
+    )
+    headers = {"Content-Disposition": 'attachment; filename="plantilla_calificaciones.csv"'}
+    return Response(content=csv_content, media_type="text/csv; charset=utf-8", headers=headers)
+
+
 @app.get("/student/dashboard")
 def student_dashboard(request: Request):
     user = require_user(request, "student")
@@ -488,6 +509,15 @@ def student_dashboard(request: Request):
     if not student:
         raise HTTPException(status_code=404, detail="Alumno no asociado a la cuenta.")
     return render(request, "student_dashboard.html", **student_dashboard_context(int(student["id"])))
+
+
+@app.get("/student/report")
+def student_report(request: Request):
+    user = require_user(request, "student")
+    student = repository.get_student_by_user_id(int(user["id"]))
+    if not student:
+        raise HTTPException(status_code=404, detail="Alumno no asociado a la cuenta.")
+    return render(request, "student_report.html", **report_context(int(student["id"])))
 
 
 @app.get("/student/profile")
@@ -606,6 +636,15 @@ def api_admin_student_predict(request: Request, student_id: int):
             status_code=422,
         )
     return service.predict(payload)
+
+
+@app.get("/admin/students/{student_id}/report")
+def admin_student_report(request: Request, student_id: int):
+    require_user(request, "admin")
+    student = repository.get_student(student_id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Alumno no encontrado.")
+    return render(request, "student_report.html", **report_context(student_id))
 
 
 @app.post("/api/admin/students")
