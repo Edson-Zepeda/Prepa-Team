@@ -58,7 +58,7 @@
                   <td><a href="/admin/students/{{ row.student_id }}">{{ row.full_name }}</a></td>
                   <td>{{ row.estimated_average_10 }}/10</td>
                   <td>{{ row.good_performance_probability|percent_display }}</td>
-                  <td>{{ row.risk_level }}</td>
+                  <td>{{ row.risk_level|title_case_es }}</td>
                 </tr>
               {% endfor %}
             </tbody>

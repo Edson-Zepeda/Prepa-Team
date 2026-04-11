@@ -45,6 +45,13 @@ def role_label(role: str | None) -> str:
     return mapping.get(role or "", role or "")
 
 
+def title_case_es(value: Any) -> str:
+    if value is None:
+        return "--"
+    text = str(value).strip()
+    return text[:1].upper() + text[1:] if text else "--"
+
+
 def risk_badge_class(level: str | None) -> str:
     if level == "bajo":
         return "status-ok"
@@ -55,6 +62,7 @@ def risk_badge_class(level: str | None) -> str:
 
 templates.env.filters["percent_display"] = percent_display
 templates.env.filters["role_label"] = role_label
+templates.env.filters["title_case_es"] = title_case_es
 templates.env.filters["risk_badge_class"] = risk_badge_class
 
 app = FastAPI(

@@ -27,7 +27,7 @@
     <div class="report-shell">
       <div class="report-actions">
         <a class="btn secondary" href="{% if current_user and current_user.role == 'admin' %}/admin/students/{{ student.id }}{% else %}/student/dashboard{% endif %}">Volver</a>
-        <button type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+        <button type="button" onclick="window.print()">Guardar PDF</button>
       </div>
 
       <section class="report-page">
@@ -58,7 +58,7 @@
           </article>
           <article class="card metric-card">
             <div class="metric-label">Nivel actual</div>
-            <div class="metric-value">{{ prediction.risk_level if prediction else "--" }}</div>
+            <div class="metric-value">{{ prediction.risk_level|title_case_es if prediction else "--" }}</div>
             <div class="metric-meta">Riesgo académico</div>
           </article>
           <article class="card metric-card">
@@ -72,7 +72,7 @@
           <article class="card">
             <h2>Plan principal</h2>
             {% if prediction %}
-              <p class="muted">Meta: {{ prediction.recommended_plan.target_zone }} · Esfuerzo: {{ prediction.recommended_plan.effort_label }}</p>
+              <p class="muted">Meta: {{ prediction.recommended_plan.target_zone|title_case_es }} · Esfuerzo: {{ prediction.recommended_plan.effort_label|title_case_es }}</p>
               <ul class="list-clean">
                 {% for action in prediction.recommended_plan.actions %}
                   <li>{{ action.change_text }}</li>
@@ -98,7 +98,7 @@
               <div class="factor-list">
                 {% for factor in prediction.priority_factors %}
                   <div class="factor-item">
-                    <div class="metric-label">{{ factor.label }}</div>
+                    <div class="metric-label">{{ factor.label|title_case_es }}</div>
                     <div>{{ factor.change_text }}</div>
                     <div class="small muted">
                       {% if factor.delta_probability > 0.001 %}

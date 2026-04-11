@@ -18,7 +18,7 @@
     </article>
     <article class="card metric-card">
       <div class="metric-label">Nivel actual</div>
-      <div class="metric-value">{{ prediction.risk_level if prediction else "--" }}</div>
+      <div class="metric-value">{{ prediction.risk_level|title_case_es if prediction else "--" }}</div>
       <div class="metric-meta">{{ approved_count }} materias aprobadas / {{ failed_count }} pendientes</div>
     </article>
   </section>
@@ -71,7 +71,7 @@
 
           <div>
             <h3>{{ prediction.recommended_plan.title }}</h3>
-            <p class="muted">Meta: {{ prediction.recommended_plan.target_zone }}</p>
+            <p class="muted">Meta: {{ prediction.recommended_plan.target_zone|title_case_es }}</p>
             <ul class="list-clean">
               {% for action in prediction.recommended_plan.actions %}
                 <li>{{ action.change_text }}</li>
@@ -85,14 +85,14 @@
                 sin cambio porcentual relevante.
               {% endif %}
             </p>
-            <p class="muted">Esfuerzo estimado: {{ prediction.recommended_plan.effort_label }}</p>
+            <p class="muted">Esfuerzo estimado: {{ prediction.recommended_plan.effort_label|title_case_es }}</p>
             <p class="muted">{{ prediction.recommended_plan.why_selected }}</p>
           </div>
 
           {% if prediction.next_level_plan %}
             <div class="subcard">
               <h3>{{ prediction.next_level_plan.title }}</h3>
-              <p class="muted">Objetivo inmediato: {{ prediction.next_level_plan.target_zone }}</p>
+              <p class="muted">Objetivo inmediato: {{ prediction.next_level_plan.target_zone|title_case_es }}</p>
               <ul class="list-clean">
                 {% for action in prediction.next_level_plan.actions %}
                   <li>{{ action.change_text }}</li>
@@ -116,7 +116,7 @@
         <div class="factor-list">
           {% for factor in prediction.priority_factors %}
             <div class="factor-item">
-              <div class="metric-label">{{ factor.label }}</div>
+              <div class="metric-label">{{ factor.label|title_case_es }}</div>
               <div>{{ factor.change_text }}</div>
               <div class="small muted">
                 Impacto esperado:
@@ -149,7 +149,7 @@
         {% for row in prediction.top_plans %}
           <article class="subcard">
             <div class="metric-label">{{ row.title }}</div>
-            <div class="small muted">Meta: {{ row.target_zone }} · Esfuerzo: {{ row.effort_label }}</div>
+            <div class="small muted">Meta: {{ row.target_zone|title_case_es }} · Esfuerzo: {{ row.effort_label|title_case_es }}</div>
             <ul class="list-clean">
               {% for action in row.actions %}
                 <li>{{ action.change_text }}</li>
