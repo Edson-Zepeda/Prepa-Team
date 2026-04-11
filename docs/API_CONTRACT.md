@@ -1,4 +1,4 @@
-# Contrato API del sistema escolar
+# Contrato API Del Sistema Escolar
 
 Base local recomendada:
 
@@ -6,58 +6,46 @@ Base local recomendada:
 http://127.0.0.1:8000
 ```
 
-## Posicionamiento del producto
+## Posicionamiento
 
-La API publica expone a Prepa-Team como una **herramienta de priorizacion e intervencion escolar personalizada**. La salida principal no es una frase generica, sino planes concretos para mover al alumno a una zona aceptable con el menor cambio posible.
+La API expone a Prepa-Team como una **herramienta de priorización e intervención escolar personalizada**. La salida principal no es una recomendación genérica, sino un conjunto de planes concretos para mover al alumno a una zona académica aceptable con el menor cambio posible.
 
-Nota sobre variables parentales:
+Las recomendaciones son simulaciones del modelo. No representan causalidad ni garantía de calificación.
 
-- `ParentalEducation` sigue entrando al modelo como escala ordinal, pero no debe mostrarse como recomendacion directa al alumno.
-- `ParentalSupport` tambien entra como escala ordinal `0-4`, pero en interfaz y mensajes debe traducirse a niveles cualitativos: `muy bajo`, `bajo`, `medio`, `alto`, `muy alto`.
-
-## Rutas generales
+## Rutas Principales
 
 ```http
-GET /health
-GET /schema
+GET  /health
+GET  /schema
 POST /predict
 POST /api/auth/login
 POST /api/auth/logout
-GET /api/student/me
-PUT /api/student/profile
+GET  /api/student/me
+PUT  /api/student/profile
 POST /api/student/predict
-GET /api/admin/students/{id}/predict
+GET  /api/admin/students/{id}/predict
 POST /api/admin/students
 POST /api/admin/grades/manual
 POST /api/admin/grades/import
+GET  /student/report
+GET  /admin/students/{id}/report
+GET  /admin/grades/template.csv
 ```
 
-## Rutas web utiles
-
-```http
-GET /student/report
-GET /admin/students/{id}/report
-GET /admin/grades/template.csv
-```
-
-- `/student/report`: vista imprimible del alumno autenticado.
-- `/admin/students/{id}/report`: reporte imprimible del alumno para directivos.
-- `/admin/grades/template.csv`: plantilla base para la carga masiva.
-
-## Esquema publico
+## Esquema Público
 
 ```http
 GET /schema
 ```
 
-Campos clave esperados:
+Campos clave:
 
 - `good_performance_threshold_10 = 6.0`
 - `acceptable_zone = "medio"`
 - `risk_bands`
 - `plan_strategies = ["minimo_esfuerzo", "balanceado", "mayor_impacto"]`
 
-## Prediccion publica
+## Predicción Pública
 
 ```http
 POST /predict
@@ -81,7 +69,7 @@ Request:
 }
 ```
 
-Response:
+Response esperado:
 
 ```json
 {
@@ -119,7 +107,7 @@ Response:
     "delta_probability": 0.19,
     "effort_score": 7,
     "effort_label": "medio",
-    "why_selected": "Se eligio porque permite subir de nivel con el menor ajuste posible."
+    "why_selected": "Se eligió porque permite subir de nivel con el menor ajuste posible."
   },
   "recommended_plan": {
     "strategy": "minimo_esfuerzo",
@@ -141,7 +129,7 @@ Response:
     "delta_probability": 0.19,
     "effort_score": 7,
     "effort_label": "medio",
-    "why_selected": "Se eligio porque alcanza la zona medio con el menor esfuerzo total."
+    "why_selected": "Se eligió porque alcanza la zona media con el menor esfuerzo total."
   },
   "top_plans": [
     {
@@ -158,7 +146,7 @@ Response:
     }
   ],
   "messages": [
-    "Estado actual: promedio estimado 5.6/10, probabilidad de buen rendimiento 73% y nivel alto."
+    "Estado actual: promedio estimado 5.6/10, probabilidad de buen rendimiento 73% y riesgo alto."
   ],
   "excluded_from_advice": [
     "StudentID",
@@ -169,16 +157,12 @@ Response:
 }
 ```
 
-## Reglas de negocio del plan
+## Reglas Del Plan
 
-- `recommended_plan`
-  - si el alumno esta en `alto` o `muy alto`, intenta llegar a `medio` o mejor
-  - si el alumno esta en `medio`, intenta llegar a `bajo`
-  - si ya esta en `bajo`, prioriza mantenimiento o mejora ligera
-- `next_level_plan`
-  - busca el menor cambio para subir solo un nivel
-- `top_plans`
-  - devuelve exactamente 3 estrategias: `minimo_esfuerzo`, `balanceado`, `mayor_impacto`
+- `recommended_plan`: plan principal para llegar a la zona objetivo.
+- `next_level_plan`: menor cambio para subir solo un nivel de riesgo.
+- `top_plans`: tres estrategias únicas: mínimo esfuerzo, balanceado y mayor impacto.
+- Si el alumno ya está en riesgo bajo, el sistema debe priorizar mantenimiento o mejora ligera.
 
 ## Login
 
@@ -206,62 +190,46 @@ Response:
 }
 ```
 
-## Perfil del alumno
+## Carga De Calificaciones
 
-```http
-PUT /api/student/profile
-Content-Type: application/json
-```
-
-Usa exactamente los mismos campos del request de prediccion.
-
-## Prediccion del alumno autenticado
-
-```http
-POST /api/student/predict
-```
-
-La API toma el perfil guardado del alumno autenticado y devuelve el mismo shape de respuesta que `/predict`.
-
-## Carga manual de calificacion
+Carga manual:
 
 ```http
 POST /api/admin/grades/manual
 Content-Type: application/json
 ```
 
-Request:
-
 ```json
 {
   "student_id": 1,
-  "subject_name": "Matematicas",
+  "subject_name": "Matemáticas",
   "period": "2026-1",
   "grade": 8.7
 }
 ```
 
-Reglas:
-
-- `grade` debe estar entre `0` y `10`
-- el estatus se deriva automaticamente:
-  - `approved` si `grade >= 6.0`
-  - `failed` si `grade < 6.0`
-
-## Importacion CSV
+Carga masiva:
 
 ```http
 POST /api/admin/grades/import
 Content-Type: multipart/form-data
 ```
 
-Schema fijo:
+Schema CSV:
 
 ```text
 student_code,full_name,subject_name,period,grade
 ```
 
-## Campos permitidos para recomendaciones
+Reglas:
+
+- `grade` debe estar entre `0` y `10`.
+- `approved` si `grade >= 6.0`.
+- `failed` si `grade < 6.0`.
+
+## Variables
+
+Campos permitidos para recomendaciones:
 
 ```text
 Age
@@ -276,7 +244,7 @@ Music
 Volunteering
 ```
 
-No deben enviarse:
+Campos excluidos:
 
 ```text
 StudentID
@@ -284,3 +252,5 @@ GradeClass
 Gender
 Ethnicity
 ```
+
+Nota: `ParentalEducation` y `ParentalSupport` entran al modelo como escalas ordinales, pero en interfaz deben mostrarse con etiquetas cualitativas cuando sea posible.

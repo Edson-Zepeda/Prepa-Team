@@ -1,16 +1,16 @@
-# Backend del sistema escolar
+# Backend Del Sistema Escolar
 
-Backend FastAPI para login, roles, control escolar y recomendaciones.
+Backend FastAPI para login, roles, control escolar, reportes y recomendaciones.
 
-## Instalar
+## Instalación
 
-Desde la raiz del repo:
+Desde la raíz del repo:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-## Preparar modelo
+## Preparar Modelo
 
 ```bash
 python scripts/build_model_artifacts.py
@@ -23,15 +23,15 @@ models/student_success_artifacts.joblib
 models/student_success_metadata.json
 ```
 
-## Inicializar base de datos y admin
+## Inicializar Base De Datos
 
 ```bash
 python scripts/bootstrap_school_system.py
 ```
 
-## Ejecutar API
+## Ejecutar
 
-Prueba rapida:
+Prueba rápida:
 
 ```bash
 python scripts/smoke_test_web_beta.py
@@ -43,7 +43,7 @@ Servidor local:
 python -m uvicorn web.backend.app:app --reload
 ```
 
-Endpoints:
+Endpoints principales:
 
 ```text
 GET  /health
@@ -51,7 +51,7 @@ GET  /schema
 POST /predict
 POST /api/auth/login
 POST /api/auth/logout
-POST /api/student/predict
 GET  /api/student/me
+POST /api/student/predict
 GET  /api/admin/students/{id}/predict
 ```
