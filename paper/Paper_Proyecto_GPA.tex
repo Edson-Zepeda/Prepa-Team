@@ -15,18 +15,18 @@
 \newcommand{\figw}{0.58\textwidth}
 \newcommand{\figsmall}{0.53\textwidth}
 \newcommand{\projectlogos}{%
-\noindent
-\IfFileExists{figures/logo_udem.png}{\includegraphics[height=1.25cm]{figures/logo_udem.png}}{\hspace{2.0cm}}%
+\noindent\makebox[\textwidth]{%
+\IfFileExists{figures/logo_udem.png}{\includegraphics[height=1.05cm]{figures/logo_udem.png}}{\hspace{2.0cm}}%
 \hfill
-\IfFileExists{figures/logo_sic.png}{\includegraphics[height=1.25cm]{figures/logo_sic.png}}{}%
-\vspace{0.35cm}
+\IfFileExists{figures/logo_sic.png}{\includegraphics[height=1.05cm]{figures/logo_sic.png}}{}%
+}\\[-0.1cm]
 }
 
-\title{Predicción y Análisis de Rendimiento Académico mediante Inteligencia Artificial}
+\title{\projectlogos\\[0.2cm]Predicción y Análisis de Rendimiento Académico mediante Inteligencia Artificial}
 
 \author{
-\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash}X@{\hspace{0.06\textwidth}}>{\centering\arraybackslash}X@{\hspace{0.06\textwidth}}>{\centering\arraybackslash}X@{}}
-\begin{minipage}[t]{0.28\textwidth}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash}X@{\hspace{0.04\textwidth}}>{\centering\arraybackslash}X@{\hspace{0.09\textwidth}}>{\centering\arraybackslash}X@{}}
+\begin{minipage}[t]{0.27\textwidth}
 \centering
 \textbf{Edson Manuel Zepeda Chávez}\\
 \textit{Samsung Innovation Campus 2025--2026}\\
@@ -34,7 +34,7 @@
 rmcedson09@gmail.com
 \end{minipage}
 &
-\begin{minipage}[t]{0.28\textwidth}
+\begin{minipage}[t]{0.25\textwidth}
 \centering
 \textbf{Francisco Ricardo Moreno Sánchez}\\
 \textit{Samsung Innovation Campus 2025--2026}\\
@@ -42,7 +42,7 @@ rmcedson09@gmail.com
 fmorenosanchez39@gmail.com
 \end{minipage}
 &
-\begin{minipage}[t]{0.28\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
 \centering
 \textbf{Alan Emir Martínez Espinosa}\\
 \textit{Samsung Innovation Campus 2025--2026}\\
@@ -53,7 +53,6 @@ maresesp012@gmail.com
 }
 
 \begin{document}
-\projectlogos
 \maketitle
 
 \begin{abstract}
