@@ -17,7 +17,7 @@
       <div class="metric-meta">Referencia oficial: {{ prediction.good_performance_threshold_10 if prediction else "6.0" }}/10</div>
     </article>
     <article class="card metric-card">
-      <div class="metric-label">Nivel actual</div>
+      <div class="metric-label">Riesgo actual</div>
       <div class="metric-value">{{ prediction.risk_level|title_case_es if prediction else "--" }}</div>
       <div class="metric-meta">{{ approved_count }} materias aprobadas / {{ failed_count }} pendientes</div>
     </article>

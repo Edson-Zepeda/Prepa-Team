@@ -68,6 +68,12 @@ PARENTAL_SUPPORT_LEVELS = {
 
 ACTIVITY_FIELDS = ["Extracurricular", "Sports", "Music", "Volunteering"]
 ACTIVITY_LABELS = {field: FIELD_LABELS[field] for field in ACTIVITY_FIELDS}
+ACTIVITY_ACTIONS = {
+    "Extracurricular": "Realizar actividad extracurricular",
+    "Sports": "Practicar deportes",
+    "Music": "Participar en música",
+    "Volunteering": "Realizar voluntariado",
+}
 
 
 def _clip_gpa(value: float) -> float:
@@ -137,11 +143,11 @@ def _change_text(field: str, before: float | int, after: float | int) -> str:
     if field == "StudyTimeWeekly":
         return f"Aumentar horas de estudio de {_value_to_display(field, before)} a {_value_to_display(field, after)} por semana"
     if field == "Tutoring":
-        return "Activar tutoría"
+        return "Tomar tutoría"
     if field == "ParentalSupport":
         return f"Reforzar apoyo familiar de {_value_to_display(field, before)} a {_value_to_display(field, after)}"
     if field in ACTIVITY_FIELDS:
-        return f"Activar {FIELD_LABELS[field]}"
+        return ACTIVITY_ACTIONS[field]
     return f"Ajustar {FIELD_LABELS[field]} de {_value_to_display(field, before)} a {_value_to_display(field, after)}"
 
 
@@ -292,7 +298,7 @@ class StudentSuccessService:
 
         tutoring_options = [("mantener tutoría", 0, lambda x: None)]
         if int(case["Tutoring"]) == 0:
-            tutoring_options.append(("activar tutoría", 2, lambda x: x.__setitem__("Tutoring", 1)))
+            tutoring_options.append(("tomar tutoría", 2, lambda x: x.__setitem__("Tutoring", 1)))
 
         support_options = [("mantener apoyo familiar", 0, lambda x: None)]
         for increase in [1, 2]:
@@ -312,7 +318,7 @@ class StudentSuccessService:
             if int(case[activity]) == 0:
                 activity_options.append(
                     (
-                        f"activar {ACTIVITY_LABELS[activity]}",
+                        ACTIVITY_ACTIONS[activity].lower(),
                         1,
                         lambda x, a=activity: x.__setitem__(a, 1),
                     )
